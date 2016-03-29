@@ -15,8 +15,8 @@ public class SocketSheepExampleClient {
    public static void main(String[] args) throws Exception {
       Socket socket = new Socket("localhost", 2048);
       OutputStream outputStream = socket.getOutputStream();
-      File f = new File("src//images//Sheep.jpg");
       
+      File f = new File("src//images//Sheep.jpg");
       BufferedImage image = ImageIO.read(f);
       ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
       ImageIO.write(image, "jpg", byteArrayOutputStream);
