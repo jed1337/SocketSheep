@@ -5,5 +5,7 @@ dist/
 nbdist/
 nbactions.xml
 .nb-gradle/
+/SocketSheepExample/SocketSheepExampleClient/nbproject/private/
+/SocketSheepExample/SocketSheepExampleServer/nbproject/private/
 /SocketSheepExample2/SocketSheepExample2Client/nbproject/private/
 /SocketSheepExample2/SocketSheepExample2Server/nbproject/private/
