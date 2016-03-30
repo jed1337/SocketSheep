@@ -14,7 +14,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.function.Consumer;
 import javax.swing.JOptionPane;
 //import java.awt.event.KeyAdapter;
 //import java.awt.event.KeyEvent;
@@ -26,8 +25,9 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    private final static String DOWN = "DOWN";
    private final static String LEFT = "LEFT";
    private final static String RIGHT = "RIGHT";
-   String direction = "";
 
+   private String clientName;
+   
    private final JButton jbUp = new JButton(UP);
    private final JButton jbDown = new JButton(DOWN);
    private final JButton jbLeft = new JButton(LEFT);
@@ -38,7 +38,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    private BufferedReader in;
    private PrintWriter pw;
 
-   public SocketSheepExample2Client() {
+   public SocketSheepExample2Client() throws IOException {
       super("SHEEP");
 
 //<editor-fold defaultstate="collapsed" desc="Add GUI">
@@ -60,6 +60,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       setVisible(true);
 //</editor-fold>
       
+      setup();
    }
 
    private void addButton(GridBagConstraints c, JButton button, 
@@ -78,7 +79,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       buttons.add(button);
    }
 
-   private void run() throws IOException {
+   private void setup() throws IOException {
       try {
          Socket socket = new Socket("::1", PORT);
          OutputStream outputStream = socket.getOutputStream();
@@ -97,9 +98,10 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
           outputStream.flush();
           socket.close();*/
          //</editor-fold>
+         
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
          pw = new PrintWriter(socket.getOutputStream(), true);
-         
+//         
          while (true) {
             String input = in.readLine();
             System.out.println(input);
@@ -109,28 +111,18 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
                 enableButtons();
             }
             
-//                direction = returnDirec();
-//            System.out.println("Direction is '"+direction+"'");
-//            if (!direction.isEmpty()) {
-//               System.out.println("UP IS ON!");
-//               byte[] buffer = direction.getBytes();
-//               out.write(buffer);
-//               System.out.println(direction);
-////                  direction = "";
-//            }
+//////               byte[] buffer = direction.getBytes();
+//////               out.write(buffer);
          }
       } catch (Exception ex) {
          System.err.println(ex.getMessage());
       }
    }
 
-   public static void main(String[] args) throws IOException {
-      SocketSheepExample2Client client = new SocketSheepExample2Client();
-      client.run();
-   }
 
    @Override
    public void actionPerformed(ActionEvent e) {
+      String direction = "";
       if (e.getSource() == jbUp) {
          direction = UP;
       } else if (e.getSource() == jbDown) {
@@ -140,23 +132,29 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       } else if (e.getSource() == jbRight) {
          direction = RIGHT;
       }
+      
+      pw.println(clientName+": "+direction);
    }
 
    /**
-    * Prompt for and return the desired screen name.
+    * Prompt for and return the desired screen clientName.
     */
    private String getClientName() {
-      //Save name somewhere
-      return JOptionPane.showInputDialog(
-              this,
+      clientName = JOptionPane.showInputDialog(this,
               "Choose a screen name:",
               "Screen name selection",
               JOptionPane.PLAIN_MESSAGE);
+      return clientName;
    }
 
    private void enableButtons() {
       buttons.stream().forEach((JButton button)->{
          button.setEnabled(true);
       });
+   }
+   
+   public static void main(String[] args) throws IOException {
+      new SocketSheepExample2Client();
+//      client.run();
    }
 }

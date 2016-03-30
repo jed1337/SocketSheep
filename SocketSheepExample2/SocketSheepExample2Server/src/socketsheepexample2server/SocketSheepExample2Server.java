@@ -34,10 +34,10 @@ public class SocketSheepExample2Server {
          while (true) {
             new Thread(new Handler(serverSocket.accept())).start();
          
-            Graphics2D tempImage = canvas.createGraphics();
-            sheep.values().stream().forEach((v)->{
-               tempImage.drawImage(sheepImage, v.getX(), v.getY(), null);
-            });
+//            Graphics2D tempImage = canvas.createGraphics();
+//            sheep.values().stream().forEach((v)->{
+//               tempImage.drawImage(sheepImage, v.getX(), v.getY(), null);
+//            });
             
             System.out.println("Client accepted");
          }
@@ -60,7 +60,7 @@ public class SocketSheepExample2Server {
       //Implement Remove images from canvas
       Graphics2D tempImage = canvas.createGraphics();
       sheep.values().stream().forEach((v)->{
-         tempImage.drawImage(sheepImage, null, v.getX(), v.getY());
+         tempImage.drawImage(sheepImage, v.getX(), v.getY(), null);
       });
 
    }
@@ -90,7 +90,7 @@ public class SocketSheepExample2Server {
             while (true) {
                String clientInput = input.readLine();
                int i = clientInput.lastIndexOf(":");
-               render(new String[]{clientInput.substring(0, i), clientInput.substring(i)});
+               render(new String[]{clientInput.substring(0, i), clientInput.substring(i+2)});
             }
 
 //            byte[] sizeAr = new byte[4];
