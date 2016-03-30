@@ -1,5 +1,7 @@
 package socketsheepexample2server;
 
+import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.Closeable;
@@ -12,26 +14,30 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 
 public class SocketSheepExample2Server {
    private final static int PORT = 4096;
    private static HashMap<String, Coordinates> sheep;
+   
+   private static BufferedImage sheepImage;
+   private static BufferedImage canvas;
 
    public static void main(String[] args) {
-      sheep = new HashMap<>();
-      
       try {
+         sheep      = new HashMap<>();
+         sheepImage = ImageIO.read(new File("src\\images\\Sheep.jpg"));
+         canvas     = new BufferedImage(1000, 1000, BufferedImage.TYPE_3BYTE_BGR);
+         
          ServerSocket serverSocket = new ServerSocket(PORT);
          System.out.println("Server started!\n");
          while (true) {
             new Thread(new Handler(serverSocket.accept())).start();
-         BufferedImage image = ImageIO.read(new File("src\\images\\Sheep.jpg"));   
-//            sheep.put("test", new Coordinates());
-//            Coordinates a =sheep.get("test");
-//            a.update(Constants.valueOf("DOWN"));
+         
+            Graphics2D tempImage = canvas.createGraphics();
+            sheep.values().stream().forEach((v)->{
+               tempImage.drawImage(sheepImage, v.getX(), v.getY(), null);
+            });
             
             System.out.println("Client accepted");
          }
@@ -48,17 +54,15 @@ public class SocketSheepExample2Server {
       if(sheepCoor==null){
          System.err.println("Sheep "+name+" has been removed!");
       }else{
-         sheepCoor.update(Constants.valueOf(direction));
+         sheepCoor.updateLocation(Constants.valueOf(direction));
       }
       
-      sheep.entrySet().stream().forEach((Map.Entry<String, Coordinates> entry)->{
-         try {
-//            BufferedImage image = ImageIO.read(getClass().getResourceAsStream("src\\images\\Sheep.jpg"));
-         } catch (IOException ex) {
-            Logger.getLogger(SocketSheepExample2Server.class.getName()).log(Level.SEVERE, null, ex);
-         }
+      //Implement Remove images from canvas
+      Graphics2D tempImage = canvas.createGraphics();
+      sheep.values().stream().forEach((v)->{
+         tempImage.drawImage(sheepImage, null, v.getX(), v.getY());
       });
-         
+
    }
 
    private static class Handler implements Runnable {
@@ -78,8 +82,9 @@ public class SocketSheepExample2Server {
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             outputStream = socket.getOutputStream();
             pw = new PrintWriter(outputStream, true);
-            
-            while(!getValidClientName(input, pw)){}
+
+            while (!getValidClientName(input, pw)) {
+            }
 
             while (true) {
                String clientInput = input.readLine();
@@ -125,10 +130,11 @@ public class SocketSheepExample2Server {
                return false;
             }
             synchronized (name) {
-               if(sheep.containsKey(name))
+               if (sheep.containsKey(name)) {
                   valid = false;
+               }
             }
-            if(valid){
+            if (valid) {
                sheep.put(name, new Coordinates(0, 0));
                break;
             }

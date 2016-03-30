@@ -23,7 +23,7 @@ public class Coordinates {
       return y;
    }
    
-   public void update(Constants direction){
+   public void updateLocation(Constants direction){
       switch(direction){
          case UP:
             y+=move;
