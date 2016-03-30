@@ -83,8 +83,9 @@ public class SocketSheepExample2Server {
             outputStream = socket.getOutputStream();
             pw = new PrintWriter(outputStream, true);
 
-            while (!getValidClientName(input, pw)) {
-            }
+            while (!getValidClientName(input, pw)) {}
+            
+            pw.println("NAMEACCEPTED");
 
             while (true) {
                String clientInput = input.readLine();

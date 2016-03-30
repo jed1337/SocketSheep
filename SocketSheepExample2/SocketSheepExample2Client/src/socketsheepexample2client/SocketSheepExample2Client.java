@@ -14,6 +14,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.function.Consumer;
 import javax.swing.JOptionPane;
 //import java.awt.event.KeyAdapter;
 //import java.awt.event.KeyEvent;
@@ -46,41 +47,10 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       setLayout(new GridBagLayout());
       GridBagConstraints c = new GridBagConstraints();
 
-      jbUp.addActionListener(this);
-      jbDown.addActionListener(this);
-      jbLeft.addActionListener(this);
-      jbRight.addActionListener(this);
-      
-      buttons.add(jbUp);
-      buttons.add(jbDown);
-      buttons.add(jbLeft);
-      buttons.add(jbRight);
-
+      addButton(c, jbUp, GridBagConstraints.HORIZONTAL, 1, 0, 1, 1);
       addButton(c, jbDown, GridBagConstraints.HORIZONTAL, 1, 1, 1, 1);
-
-      c.fill = GridBagConstraints.HORIZONTAL;
-      c.weightx = 0.5;
-      c.gridx = 1;
-      c.gridy = 1;
-      c.gridheight = 1;
-      c.gridwidth = 1;
-      add(jbDown, c);
-
-      c.fill = GridBagConstraints.VERTICAL;
-      c.weightx = 0.5;
-      c.gridx = 0;
-      c.gridy = 0;
-      c.gridheight = 2;
-      c.gridwidth = 1;
-      add(jbLeft, c);
-
-      c.fill = GridBagConstraints.VERTICAL;
-      c.weightx = 0.5;
-      c.gridx = 2;
-      c.gridy = 0;
-      c.gridheight = 2;
-      c.gridwidth = 1;
-      add(jbRight, c);
+      addButton(c, jbLeft, GridBagConstraints.VERTICAL, 0, 0, 2, 1);
+      addButton(c, jbRight, GridBagConstraints.VERTICAL, 2, 0, 2, 1);
 
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       setResizable(false);
@@ -94,6 +64,9 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
 
    private void addButton(GridBagConstraints c, JButton button, 
                            int fill, int x, int y, int height, int weight) {
+      button.addActionListener(this);
+      button.setEnabled(false);
+      
       c.fill = fill;
       c.weightx = 0.5;
       c.gridx = x;
@@ -101,6 +74,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       c.gridheight = height;
       c.gridwidth = weight;
       add(button, c);
+      
+      buttons.add(button);
    }
 
    private void run() throws IOException {
@@ -129,8 +104,10 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
             String input = in.readLine();
             System.out.println(input);
             if (input.startsWith("SUBMITNAME")) {
-                output.println(getName());
-            } 
+                pw.println(getClientName());
+            } else if (input.startsWith("NAMEACCEPTED")) {
+                enableButtons();
+            }
             
 //                direction = returnDirec();
 //            System.out.println("Direction is '"+direction+"'");
@@ -177,4 +154,9 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
               JOptionPane.PLAIN_MESSAGE);
    }
 
+   private void enableButtons() {
+      buttons.stream().forEach((JButton button)->{
+         button.setEnabled(true);
+      });
+   }
 }
