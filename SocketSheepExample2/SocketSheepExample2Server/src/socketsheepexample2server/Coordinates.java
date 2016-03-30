@@ -4,7 +4,7 @@ public class Coordinates {
    private int x;
    private int y;
    
-   private int move = 10;
+   private final int move = 50;
    
    public Coordinates(){
       this(0,0);
@@ -38,5 +38,10 @@ public class Coordinates {
             x-=move;
             break;
       }
+   }
+   
+   @Override
+   public String toString(){
+      return String.format("x: %d, y: %d\n", x, y);
    }
 }

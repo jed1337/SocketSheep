@@ -1,7 +1,9 @@
 package socketsheepexample2server;
 
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.Closeable;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -9,6 +11,10 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.imageio.ImageIO;
 
 public class SocketSheepExample2Server {
    private final static int PORT = 4096;
@@ -22,6 +28,11 @@ public class SocketSheepExample2Server {
          System.out.println("Server started!\n");
          while (true) {
             new Thread(new Handler(serverSocket.accept())).start();
+         BufferedImage image = ImageIO.read(new File("src\\images\\Sheep.jpg"));   
+//            sheep.put("test", new Coordinates());
+//            Coordinates a =sheep.get("test");
+//            a.update(Constants.valueOf("DOWN"));
+            
             System.out.println("Client accepted");
          }
       } catch (IOException ex) {
@@ -39,6 +50,15 @@ public class SocketSheepExample2Server {
       }else{
          sheepCoor.update(Constants.valueOf(direction));
       }
+      
+      sheep.entrySet().stream().forEach((Map.Entry<String, Coordinates> entry)->{
+         try {
+//            BufferedImage image = ImageIO.read(getClass().getResourceAsStream("src\\images\\Sheep.jpg"));
+         } catch (IOException ex) {
+            Logger.getLogger(SocketSheepExample2Server.class.getName()).log(Level.SEVERE, null, ex);
+         }
+      });
+         
    }
 
    private static class Handler implements Runnable {
