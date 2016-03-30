@@ -33,8 +33,18 @@ public class Handler implements Runnable {
             input = socket.getInputStream();
             outputStream = socket.getOutputStream();
             pw = new PrintWriter(outputStream, true);
+            int count;
+            byte[] buffer = new byte[4];
+            while ((count = input.read(buffer)) > 0) {
+                outputStream.write(buffer, 0, count);
+                String s = new String(buffer);
+                System.out.println(s);
+                System.out.println("hi!");
+            }
 
-            byte[] sizeAr = new byte[4];
+            input.close();
+            // <editor-fold desc="Old Code">
+            /*byte[] sizeAr = new byte[4];
             input.read(sizeAr);
             int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
             byte[] imageAr = new byte[size];
@@ -42,7 +52,8 @@ public class Handler implements Runnable {
             BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
             System.out.println("Received " + image.getHeight() + "x" + image.getWidth() + ": " + System.currentTimeMillis());
             ImageIO.write(image, "jpg", new File("Image-" + System.currentTimeMillis() + ".jpg"));
-            input.close();
+            input.close();*/
+            // </editor-fold>
        } catch (IOException ex) {
           Logger.getLogger(Handler.class.getName()).log(Level.SEVERE, null, ex);
        }
