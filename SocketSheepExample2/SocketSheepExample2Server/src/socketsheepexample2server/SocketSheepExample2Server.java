@@ -11,11 +11,18 @@ public class SocketSheepExample2Server {
          ServerSocket serverSocket = new ServerSocket(PORT);
          System.out.println("Server started!\n");
          while(true){
-            new Thread(new Handler(serverSocket.accept())).start();
+            new Thread(new Handler(serverSocket.accept(), this)).start();
             System.out.println("Client accepted");
          }
       } catch (IOException ex) {
          System.err.println(ex.getMessage());
       }
+   }
+
+   void render(String[] clientInput) {
+      String name = clientInput[0];
+      String direction = clientInput[1];
+      
+      
    }
 }
