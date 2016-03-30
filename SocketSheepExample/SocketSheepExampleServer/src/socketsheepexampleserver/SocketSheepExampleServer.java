@@ -25,22 +25,22 @@ public class SocketSheepExampleServer implements Runnable {
 
    @Override
    public void run() {
-      InputStream inputStream = null;
-      try {
-         inputStream = this.soc.getInputStream();
-         System.out.println("Reading: " + System.currentTimeMillis());
-         byte[] sizeAr = new byte[4];
-         inputStream.read(sizeAr);
-         int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
-         byte[] imageAr = new byte[size];
-         inputStream.read(imageAr);
-         BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
-         System.out.println("Received " + image.getHeight() + "x" + image.getWidth() + ": " + System.currentTimeMillis());
-         ImageIO.write(image, "jpg", new File(dir + System.currentTimeMillis() + ".jpg"));
-         inputStream.close();
-      } catch (IOException ex) {
-         Logger.getLogger(SocketSheepExampleServer.class.getName()).log(Level.SEVERE, null, ex);
-      }
+        InputStream inputStream = null;
+        try {
+           inputStream = this.soc.getInputStream();
+           System.out.println("Reading: " + System.currentTimeMillis());
+           byte[] sizeAr = new byte[4];
+           inputStream.read(sizeAr);
+           int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
+           byte[] imageAr = new byte[size];
+           inputStream.read(imageAr);
+           BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
+           System.out.println("Received " + image.getHeight() + "x" + image.getWidth() + ": " + System.currentTimeMillis());
+           ImageIO.write(image, "jpg", new File(dir + System.currentTimeMillis() + ".jpg"));
+           inputStream.close();
+        } catch (IOException ex) {
+           Logger.getLogger(SocketSheepExampleServer.class.getName()).log(Level.SEVERE, null, ex);
+        }
 
    }
 
