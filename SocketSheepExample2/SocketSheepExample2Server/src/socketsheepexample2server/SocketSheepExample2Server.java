@@ -14,7 +14,6 @@ public class SocketSheepExample2Server {
             new Thread(new Handler(serverSocket.accept())).start();
             System.out.println("Client accepted");
          }
-         
       } catch (IOException ex) {
          System.err.println(ex.getMessage());
       }
