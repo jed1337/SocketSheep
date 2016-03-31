@@ -26,7 +26,8 @@ public class SocketSheepExample2Server {
    public static void main(String[] args) {
       try {
          sheep      = new HashMap<>();
-         sheepImage = ImageIO.read(new File("src\\images\\Sheep.jpg"));
+         //sheepImage = ImageIO.read(new File("src\\images\\Sheep.jpg"));
+         sheepImage = ImageIO.read(new File("src/images/Sheep.jpg"));
          canvas     = new BufferedImage(1000, 1000, BufferedImage.TYPE_3BYTE_BGR);
          
          ServerSocket serverSocket = new ServerSocket(PORT);
