@@ -143,7 +143,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
          }
       } catch (IOException | NumberFormatException ex) {
          System.err.println(ex.getMessage());
-      }
+       }
    }
 
 
