@@ -1,6 +1,7 @@
 package socketsheepexample2client;
 
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -22,9 +23,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
-//import java.awt.event.KeyAdapter;
-//import java.awt.event.KeyEvent;
-//import java.awt.event.KeyListener;
 
 public class SocketSheepExample2Client extends JFrame implements ActionListener {
    private final static int PORT = 4096;
@@ -42,69 +40,72 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    
    private final JPanel pnl = new JPanel();
    
-   private final ArrayList<JButton> buttons;
+   private ArrayList<JButton> buttons;
    
    private BufferedReader in;
    private PrintWriter pw;
    
-   private BufferedImage sheep;
-   private JLabel sheepLabel;
-   
+   private final BufferedImage sheep;
+   private final JLabel sheepLabel;
    
    public SocketSheepExample2Client() throws IOException {
       super("SHEEP");
+      
       sheep      = ImageIO.read(new File("src\\images\\Sheep.jpg"));
       sheepLabel = new JLabel(new ImageIcon(sheep));
+      buttons    = new ArrayList<>();
       
-//<editor-fold defaultstate="collapsed" desc="Add GUI">
-      buttons = new ArrayList<>();
-      
+      setupGUI();
+       
+      setup();
+   }
+   
+//<editor-fold defaultstate="collapsed" desc="Gui Things">
+   
+   private void setupGUI() {
       setLayout(new GridBagLayout());
       GridBagConstraints c = new GridBagConstraints();
       pnl.setPreferredSize(new Dimension(500,420));
       pnl.setBorder(new LineBorder(Color.black, 1));
       
-      c.fill = GridBagConstraints.VERTICAL;
-      c.weightx = 0.5;
-      c.gridx = 0;
-      c.gridy = 0;
-      c.gridheight = 1;
-      c.gridwidth = 3;
-      add(pnl, c);
+      addComponent(c, pnl, GridBagConstraints.VERTICAL, 0, 0, 1, 3);
       
       addButton(c, jbUp, GridBagConstraints.HORIZONTAL, 1, 1, 1, 1);
       addButton(c, jbDown, GridBagConstraints.HORIZONTAL, 1, 2, 1, 1);
       addButton(c, jbLeft, GridBagConstraints.VERTICAL, 0, 1, 2, 1);
       addButton(c, jbRight, GridBagConstraints.VERTICAL, 2, 1, 2, 1);
-
+      
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       setResizable(false);
       setPreferredSize(new Dimension(600, 600));
       pack();
       setLocationRelativeTo(null);
       setVisible(true);
-      System.out.println("");
-//</editor-fold>
-       
-      setup();
-   }
-
-   private void addButton(GridBagConstraints c, JButton button, 
-                           int fill, int x, int y, int height, int width) {
-      button.addActionListener(this);
-      button.setEnabled(false);
       
+      System.out.println("");
+   }
+   private void addComponent(GridBagConstraints c, Component component,
+                                                   int fill, int x, int y, int height, int width) {
       c.fill = fill;
       c.weightx = 0.5;
       c.gridx = x;
       c.gridy = y;
       c.gridheight = height;
       c.gridwidth = width;
-      add(button, c);
       
+      add(component, c);
+   }
+   private void addButton(GridBagConstraints c, JButton button,
+                                                int fill, int x, int y, int height, int width) {
+      
+      addComponent(c, button, fill, x, y, height, width);
+      
+      button.addActionListener(this);
+      button.setEnabled(false);
       buttons.add(button);
    }
-
+//</editor-fold>
+   
    private void setup() throws IOException {
       try {
          Socket socket = new Socket("::1", PORT);
@@ -115,32 +116,15 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
          while (true) {
             String input = in.readLine();
             System.out.println(input);
+            
             if(input!=null){
                if (input.startsWith("SUBMITNAME")) {
                    pw.println(getClientName());
                } else if (input.startsWith("NAMEACCEPTED")) {
                    enableButtons();
                } 
-               else if (input.startsWith("IMAGE")){ 
-//                  System.out.println("IMAGE");
-                  String[] sCoordinates = input.substring(5).split(",");
-                  System.out.println("Size: "+sCoordinates.length);
-                  int[] nCoordinates = new int[sCoordinates.length*2];
-
-                  for(int i=0;i<sCoordinates.length;i++){
-                     String[] split = sCoordinates[i].split(":");
-                     nCoordinates[i*2]     = Integer.parseInt(split[0]);
-                     nCoordinates[(i*2)+1] = Integer.parseInt(split[1]);
-                  }
-                  
-                  pnl.removeAll();
-                  for(int i=0;i<nCoordinates.length;i+=2){
-                     JLabel temp = new JLabel(new ImageIcon(sheep));
-                     temp.setSize(100, 100);
-                     pnl.add(temp);
-                     temp.setLocation(nCoordinates[i], nCoordinates[i+1]);
-                     System.out.println("");
-                  }
+               else if (input.startsWith("IMAGE")){
+                  handleImages(input);
                }
             }
          }
@@ -148,7 +132,38 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
          System.err.println(ex.getMessage());
       }
    }
+   
+   /**
+    * Prompt for and return the desired screen clientName.
+    */
+   private String getClientName() {
+      clientName = JOptionPane.showInputDialog(this,
+              "Choose a screen name:",
+              "Screen name selection",
+              JOptionPane.PLAIN_MESSAGE);
+      return clientName;
+   }
 
+   private void handleImages(String input) throws NumberFormatException {
+      String[] sCoordinates = input.substring(5).split(",");
+      System.out.println("Size: "+sCoordinates.length);
+      int[] nCoordinates = new int[sCoordinates.length*2];
+      
+      for(int i=0;i<sCoordinates.length;i++){
+         String[] split = sCoordinates[i].split(":");
+         nCoordinates[i*2]     = Integer.parseInt(split[0]);
+         nCoordinates[(i*2)+1] = Integer.parseInt(split[1]);
+      }
+      
+      pnl.removeAll();
+      for(int i=0;i<nCoordinates.length;i+=2){
+         JLabel temp = new JLabel(new ImageIcon(sheep));
+         temp.setSize(100, 100);
+         pnl.add(temp);
+         temp.setLocation(nCoordinates[i], nCoordinates[i+1]);
+         System.out.println("");
+      }
+   }
 
    @Override
    public void actionPerformed(ActionEvent e) {
@@ -164,17 +179,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       }
       
       pw.println(clientName+": "+direction);
-   }
-
-   /**
-    * Prompt for and return the desired screen clientName.
-    */
-   private String getClientName() {
-      clientName = JOptionPane.showInputDialog(this,
-              "Choose a screen name:",
-              "Screen name selection",
-              JOptionPane.PLAIN_MESSAGE);
-      return clientName;
    }
 
    private void enableButtons() {

@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 public class SocketSheepExample2Server {
    private final static int PORT = 4096;
-    private static HashMap<String, Coordinates> sheep;
+   private static HashMap<String, Coordinates> sheep;
    private static ArrayList<PrintWriter> clientPrintWriters;
    
    public static void main(String[] args) {
@@ -21,7 +21,8 @@ public class SocketSheepExample2Server {
          clientPrintWriters = new ArrayList<>();
          
          ServerSocket serverSocket = new ServerSocket(PORT);
-         System.out.println("Server started!\n");
+         System.out.println("Server started!");
+         
          while (true) {
             new Thread(new Handler(serverSocket.accept())).start();
             System.out.println("Client accepted");
@@ -69,7 +70,6 @@ public class SocketSheepExample2Server {
       public void run() {
          try {
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//            outputStream = socket.getOutputStream();
             pw = new PrintWriter(socket.getOutputStream(), true);
             clientPrintWriters.add(pw);
             while (!getValidClientName(input, pw)) {}
@@ -80,8 +80,7 @@ public class SocketSheepExample2Server {
                String clientInput = input.readLine();
                System.out.println("Got input from client: "+clientInput);
                
-               int i = clientInput.lastIndexOf(":");
-               sendImageToAllClients(clientInput, i);
+               sendImageToAllClients(clientInput, clientInput.lastIndexOf(":"));
             }
          } catch (IOException ex) {
             System.err.println(ex.getMessage());
@@ -94,16 +93,6 @@ public class SocketSheepExample2Server {
          clientPrintWriters.stream().forEach((printWriter)->{
             printWriter.println(newImage);
          });
-      }
-
-      private void close(Closeable c) {
-         try {
-            if (c != null) {
-               c.close();
-            }
-         } catch (IOException ex) {
-            System.err.println(ex.getMessage());
-         }
       }
 
       private boolean getValidClientName(BufferedReader input, PrintWriter pw) throws IOException {
@@ -130,6 +119,15 @@ public class SocketSheepExample2Server {
             }
          }
          return true;
+      }
+      private void close(Closeable c) {
+         try {
+            if (c != null) {
+               c.close();
+            }
+         } catch (IOException ex) {
+            System.err.println(ex.getMessage());
+         }
       }
    }
 }
