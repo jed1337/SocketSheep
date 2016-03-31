@@ -26,7 +26,7 @@ public class SocketSheepExample2Server {
    public static void main(String[] args) {
       try {
          sheep      = new HashMap<>();
-         sheepImage = ImageIO.read(new File("src\\images\\Sheep.jpg"));
+         sheepImage = ImageIO.read(new File("src/images/Sheep.jpg"));
          canvas     = new BufferedImage(1000, 1000, BufferedImage.TYPE_3BYTE_BGR);
          
          ServerSocket serverSocket = new ServerSocket(PORT);
@@ -127,7 +127,7 @@ public class SocketSheepExample2Server {
             valid = true;
             pw.println("SUBMITNAME");
             String name = input.readLine();
-            if (name == null) {
+            if (name.isEmpty() || name == null) {
                return false;
             }
             synchronized (name) {
