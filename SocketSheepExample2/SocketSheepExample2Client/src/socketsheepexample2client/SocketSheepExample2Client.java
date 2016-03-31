@@ -38,15 +38,23 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    private BufferedReader in;
    private PrintWriter pw;
    private final MyPanel myPanel;
+   private static String OS = System.getProperty("os.name");
    
    public SocketSheepExample2Client() throws IOException {
       super("SHEEP");
       
-      buttons    = new ArrayList<>();
-      myPanel    = new MyPanel("src\\images\\Sheep.jpg");
-      
-      setupGUI();
-      setupProtocolReceiver();
+        String s = "";
+        if(OS.contains("Windows")){
+            s = "\\";
+        } else if(OS.contains("Mac")){
+            s = "/";
+        }
+
+        buttons    = new ArrayList<>();
+        myPanel    = new MyPanel("src"+s+"images"+s+"Sheep.jpg");
+
+        setupGUI();
+        setupProtocolReceiver();
    }
    
 //<editor-fold defaultstate="collapsed" desc="Gui Things">
