@@ -26,10 +26,10 @@ public class Coordinates {
    public void updateLocation(Constants direction){
       switch(direction){
          case UP:
-            y+=move;
+            y-=move;
             break;
          case DOWN:
-            y-=move;
+            y+=move;
             break;
          case RIGHT:
             x+=move;

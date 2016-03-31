@@ -11,17 +11,13 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
-import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
 
 public class SocketSheepExample2Client extends JFrame implements ActionListener {
@@ -33,31 +29,24 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
 
    private String clientName;
    
-   private final JButton jbUp = new JButton(UP);
+   private final JButton jbUp   = new JButton(UP);
    private final JButton jbDown = new JButton(DOWN);
    private final JButton jbLeft = new JButton(LEFT);
    private final JButton jbRight = new JButton(RIGHT);
-   
-   private final JPanel pnl = new JPanel();
-   
-   private ArrayList<JButton> buttons;
+   private final ArrayList<JButton> buttons;
    
    private BufferedReader in;
    private PrintWriter pw;
-   
-   private final BufferedImage sheep;
-   private final JLabel sheepLabel;
+   private final MyPanel myPanel;
    
    public SocketSheepExample2Client() throws IOException {
       super("SHEEP");
       
-      sheep      = ImageIO.read(new File("src\\images\\Sheep.jpg"));
-      sheepLabel = new JLabel(new ImageIcon(sheep));
       buttons    = new ArrayList<>();
+      myPanel    = new MyPanel("src\\images\\Sheep.jpg");
       
       setupGUI();
-       
-      setup();
+      setupProtocolReceiver();
    }
    
 //<editor-fold defaultstate="collapsed" desc="Gui Things">
@@ -65,10 +54,10 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    private void setupGUI() {
       setLayout(new GridBagLayout());
       GridBagConstraints c = new GridBagConstraints();
-      pnl.setPreferredSize(new Dimension(500,420));
-      pnl.setBorder(new LineBorder(Color.black, 1));
+      myPanel.setPreferredSize(new Dimension(500,420));
+      myPanel.setBorder(new LineBorder(Color.black, 1));
       
-      addComponent(c, pnl, GridBagConstraints.VERTICAL, 0, 0, 1, 3);
+      addComponent(c, myPanel, GridBagConstraints.VERTICAL, 0, 0, 1, 3);
       
       addButton(c, jbUp, GridBagConstraints.HORIZONTAL, 1, 1, 1, 1);
       addButton(c, jbDown, GridBagConstraints.HORIZONTAL, 1, 2, 1, 1);
@@ -106,7 +95,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    }
 //</editor-fold>
    
-   private void setup() throws IOException {
+   private void setupProtocolReceiver() throws IOException {
       try {
          Socket socket = new Socket("::1", PORT);
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -154,15 +143,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
          nCoordinates[i*2]     = Integer.parseInt(split[0]);
          nCoordinates[(i*2)+1] = Integer.parseInt(split[1]);
       }
-      
-      pnl.removeAll();
-      for(int i=0;i<nCoordinates.length;i+=2){
-         JLabel temp = new JLabel(new ImageIcon(sheep));
-         temp.setSize(100, 100);
-         pnl.add(temp);
-         temp.setLocation(nCoordinates[i], nCoordinates[i+1]);
-         System.out.println("");
-      }
+
+      myPanel.updateCoordinates(nCoordinates);
    }
 
    @Override
@@ -185,6 +167,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       buttons.stream().forEach((JButton button)->{
          button.setEnabled(true);
       });
+      jbUp.doClick();
+      jbDown.doClick();
    }
    
    public static void main(String[] args) throws IOException {
