@@ -13,7 +13,7 @@ public class MyPanel extends JPanel{
    private int[] nCoordinates;
 
    public MyPanel(String filePath) throws IOException {
-      this.sheep        = ImageIO.read(new File("src\\images\\Sheep.jpg"));
+      this.sheep        = ImageIO.read(new File(filePath));
       this.nCoordinates = new int[0];
       
       this.setBackground(Color.WHITE);

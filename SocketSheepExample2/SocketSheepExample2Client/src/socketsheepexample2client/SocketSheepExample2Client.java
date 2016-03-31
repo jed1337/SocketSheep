@@ -15,6 +15,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Random;
 import javax.swing.JOptionPane;
 import javax.swing.border.LineBorder;
 
@@ -25,6 +26,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    private final static String LEFT = "LEFT";
    private final static String RIGHT = "RIGHT";
 
+   private final Random rand;
    private String clientName;
    
    private final JButton jbUp   = new JButton(UP);
@@ -37,14 +39,20 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    private PrintWriter pw;
    private final MyPanel myPanel;
    
-   public SocketSheepExample2Client() throws IOException {
+   public SocketSheepExample2Client(String clientName) throws IOException{
       super("SHEEP");
+      this.clientName = clientName;
       
-      buttons    = new ArrayList<>();
-      myPanel    = new MyPanel("src\\images\\Sheep.jpg");
+      buttons = new ArrayList<>();
+      myPanel = new MyPanel("src\\images\\Sheep.jpg");
+      rand    = new Random();
       
       setupGUI();
       setupProtocolReceiver();
+   }
+   
+   public SocketSheepExample2Client() throws IOException {
+      this(null);
    }
    
 //<editor-fold defaultstate="collapsed" desc="Gui Things">
@@ -124,11 +132,13 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
     * Prompt for and return the desired screen clientName.
     */
    private String getClientName() {
-      clientName = JOptionPane.showInputDialog(this,
-              "Choose a screen name:",
-              "Screen name selection",
-              JOptionPane.PLAIN_MESSAGE);
-      this.setTitle(this.getTitle()+" "+clientName);
+      if(clientName==null){
+         clientName = JOptionPane.showInputDialog(this,
+                 "Choose a screen name:",
+                 "Screen name selection",
+                 JOptionPane.PLAIN_MESSAGE);
+      }
+      this.setTitle(this.getTitle()+": "+clientName);
       return clientName;
    }
 
@@ -160,6 +170,10 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       }
       
       pw.println(clientName+": "+direction);
+   }
+   
+   private void randomMovement(){
+      buttons.get(rand.nextInt(buttons.size())).doClick();
    }
 
    private void enableButtons() {
