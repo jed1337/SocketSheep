@@ -8,15 +8,18 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 
 public class SocketSheepExample2Server {
    private final static int PORT = 4096;
    private static HashMap<String, Coordinates> sheep;
+   private static ArrayList<OutputStream> clientOutputStreams;
    
    public static void main(String[] args) {
       try {
-         sheep      = new HashMap<>();
+         sheep               = new HashMap<>();
+         clientOutputStreams = new ArrayList<>();
          
          ServerSocket serverSocket = new ServerSocket(PORT);
          System.out.println("Server started!\n");
@@ -56,7 +59,6 @@ public class SocketSheepExample2Server {
       private final Socket socket;
 
       private BufferedReader input;
-      private OutputStream outputStream;
       private PrintWriter pw;
 
       public Handler(Socket socket) {
@@ -67,24 +69,19 @@ public class SocketSheepExample2Server {
       public void run() {
          try {
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            outputStream = socket.getOutputStream();
-            pw = new PrintWriter(outputStream, true);
+//            outputStream = socket.getOutputStream();
+            pw = new PrintWriter(socket.getOutputStream(), true);
 
             while (!getValidClientName(input, pw)) {}
             
             pw.println("NAMEACCEPTED");
-
             while (true) {
                String clientInput = input.readLine();
                int i = clientInput.lastIndexOf(":");
                
-               OutputStream out = socket.getOutputStream();
-               out.write("IMAGE".getBytes());
+               pw.println("IMAGE");
+               pw.println(render(new String[]{clientInput.substring(0, i), clientInput.substring(i+2)}));
                
-               out.write(render(new String[]{clientInput.substring(0, i), clientInput.substring(i+2)})
-                  .getBytes());
-               
-               out.flush();
 //               close(out);
             }
          } catch (IOException ex) {
