@@ -32,17 +32,14 @@ public class SocketSheepExample2Server {
       }
    }
 
-   private static String render(String[] clientInput) {
+   private static void updateSheepLocation(String[] clientInput) {
       String name = clientInput[0];
       String direction = clientInput[1];
       
-      Coordinates sheepCoor = sheep.get(name);
-      if(sheepCoor==null){
-         System.err.println("Sheep "+name+" has been removed!");
-      }else{
-         sheepCoor.updateLocation(Constants.valueOf(direction));
-      }
-      
+      sheep.get(name).updateLocation(Constants.valueOf(direction));
+   }
+   
+   private static String updateImageProtocol(){
       StringBuilder sb = new StringBuilder();
       sb.append("IMAGE");
       
@@ -61,6 +58,8 @@ public class SocketSheepExample2Server {
 
       private BufferedReader input;
       private PrintWriter pw;
+      
+      private String clientName;
 
       public Handler(Socket socket) {
          this.socket = socket;
@@ -70,9 +69,10 @@ public class SocketSheepExample2Server {
       public void run() {
          try {
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            pw = new PrintWriter(socket.getOutputStream(), true);
+            pw    = new PrintWriter(socket.getOutputStream(), true);
             clientPrintWriters.add(pw);
-            while (!getValidClientName(input, pw)) {}
+            
+            clientName = getValidClientName(input, pw);
             
             pw.println("NAMEACCEPTED");
             
@@ -80,45 +80,54 @@ public class SocketSheepExample2Server {
                String clientInput = input.readLine();
                System.out.println("Got input from client: "+clientInput);
                
-               sendImageToAllClients(clientInput, clientInput.lastIndexOf(":"));
+               sendUpdatedImageToAllClients(clientInput, clientInput.lastIndexOf(":"));
             }
          } catch (IOException ex) {
             System.err.println(ex.getMessage());
+            removeSheep(clientName);
          }
       }
 
-      private void sendImageToAllClients(String clientInput, int i) {
-         String newImage = render(new String[]{clientInput.substring(0, i), clientInput.substring(i+2)});
-         
+      private void sendUpdatedImageToAllClients(String clientInput, int i) {
+         updateSheepLocation(new String[]{clientInput.substring(0, i), clientInput.substring(i+2)});
+         sendImageProtocolToClients();
+      }
+      
+      private void removeSheep(String clientName) {
+         sheep.remove(clientName);
+         sendImageProtocolToClients();
+      }
+      
+      private void sendImageProtocolToClients(){
+         String newImage = updateImageProtocol();
          clientPrintWriters.stream().forEach((printWriter)->{
             printWriter.println(newImage);
          });
       }
-
-      private boolean getValidClientName(BufferedReader input, PrintWriter pw) throws IOException {
+      
+      private String getValidClientName(BufferedReader input, PrintWriter pw) throws IOException {
          // Request a name from this client.  Keep requesting until
          // a name is submitted that is not already used.  Note that
          // checking for the existence of a name and adding the name
          // must be done while locking the set of names.
          boolean valid = false;
+         String name="";
+         
          while (!valid) {
             valid = true;
             pw.println("SUBMITNAME");
-            String name = input.readLine();
+            name = input.readLine();
             if (name.isEmpty() || name == null) {
-               return false;
+               valid = false;
             }
             synchronized (name) {
                if (sheep.containsKey(name)) {
                   valid = false;
                }
             }
-            if (valid) {
-               sheep.put(name, new Coordinates(0, 0));
-               break;
-            }
          }
-         return true;
+         sheep.put(name, new Coordinates(0, 0));
+         return name;
       }
       private void close(Closeable c) {
          try {

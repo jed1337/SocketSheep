@@ -15,8 +15,6 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.border.LineBorder;
 
@@ -130,6 +128,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
               "Choose a screen name:",
               "Screen name selection",
               JOptionPane.PLAIN_MESSAGE);
+      this.setTitle(this.getTitle()+" "+clientName);
       return clientName;
    }
 
