@@ -12,7 +12,7 @@ import java.util.HashMap;
 
 public class SocketSheepExample2Server {
    private final static int PORT = 4096;
-   private static HashMap<String, Coordinates> sheep;
+    private static HashMap<String, Coordinates> sheep;
    private static ArrayList<PrintWriter> clientPrintWriters;
    
    public static void main(String[] args) {
