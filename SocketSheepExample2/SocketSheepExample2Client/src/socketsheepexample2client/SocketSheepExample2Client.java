@@ -14,6 +14,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.border.LineBorder;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -190,4 +192,5 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    public static void main(String[] args) throws IOException {
       new SocketSheepExample2Client();
    }
+   
 }
