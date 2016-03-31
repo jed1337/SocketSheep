@@ -78,7 +78,7 @@ public class SocketSheepExample2Server {
             
             while (true) {
                String clientInput = input.readLine();
-               System.out.println("Got input from client: "+clientInput);
+               //System.out.println("Got input from client: "+clientInput);
                
                sendUpdatedImageToAllClients(clientInput, clientInput.lastIndexOf(":"));
             }

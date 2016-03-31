@@ -46,8 +46,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       this.randomMovements = randomMovements;
       this.clientName      = clientName;
 
-      String filePath = "src\\images\\Sheep.jpg";
-      if(System.getProperty("os.name").contains("mac")){
+      String filePath = "src\\images\\Sheep.png";
+      if(System.getProperty("os.name").contains("Mac")){
          filePath = filePath.replaceAll("\\\\", "/");
       }
       myPanel = new MyPanel(filePath);
@@ -67,7 +67,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private void setupGUI() {
       setLayout(new GridBagLayout());
       GridBagConstraints c = new GridBagConstraints();
-      myPanel.setPreferredSize(new Dimension(500,420));
+      myPanel.setPreferredSize(new Dimension(800,520));
       myPanel.setBorder(new LineBorder(Color.black, 1));
       
       addComponent(c, myPanel, GridBagConstraints.VERTICAL, 0, 0, 1, 3);
@@ -79,12 +79,12 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       setResizable(false);
-      setPreferredSize(new Dimension(600, 600));
+      setPreferredSize(new Dimension(900, 600));
       pack();
       setLocationRelativeTo(null);
       setVisible(true);
       
-      System.out.println("");
+      //System.out.println("");
    }
    private void addComponent(GridBagConstraints c, Component component,int fill, 
                               int x, int y, int height, int width) {
@@ -117,7 +117,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          
          while (true) {
             String input = in.readLine();
-            System.out.println(input);
+            //System.out.println(input);
             
             if(input!=null){
                if (input.startsWith("SUBMITNAME")) {
@@ -193,7 +193,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    }
    
    public static void main(String[] args) throws IOException {
-      int SHEEP_LIMIT         = 5;
+      int SHEEP_LIMIT         = 10;
       boolean randomMovements = true;
       
       for(int i=0;i<SHEEP_LIMIT;i++){
