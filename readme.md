@@ -13,3 +13,5 @@
 * http://www.dreamincode.net/forums/topic/341224-simple-client-server-sending-byte-arrays/
 * http://stackoverflow.com/questions/9520911/java-sending-and-receiving-file-byte-over-sockets
 
+* http://www.java-samples.com/showtutorial.php?tutorialid=388
+* http://www.tutorialspoint.com/java/java_bytearrayoutputstream.htm
