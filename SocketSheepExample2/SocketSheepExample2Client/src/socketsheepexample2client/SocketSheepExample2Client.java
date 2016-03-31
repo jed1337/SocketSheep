@@ -122,28 +122,29 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
                    enableButtons();
                } 
                else if (input.startsWith("IMAGE")){
-                  System.out.println("IMAGE");
+//                  System.out.println("IMAGE");
                   String[] sCoordinates = input.substring(5).split(",");
-                  int[] nCoordinates = new int[sCoordinates.length*2];
-
-                  for(int i=0;i<sCoordinates.length;i++){
-                     String[] split = sCoordinates[i].split(":");
-                     nCoordinates[i*2]     = Integer.parseInt(split[0]);
-                     nCoordinates[(i*2)+1] = Integer.parseInt(split[1]);
-                  }
-
-                  for(int i=0;i<nCoordinates.length;i+=2){
-                     JLabel temp = new JLabel(new ImageIcon(sheep));
-                     pnl.add(temp);
-                     temp.setLocation(nCoordinates[i], nCoordinates[i+1]);
-                     temp.setSize(10, 10);
-                  }
+                  System.out.println("Size: "+sCoordinates.length);
+//                  int[] nCoordinates = new int[sCoordinates.length*2];
+//
+//                  for(int i=0;i<sCoordinates.length;i++){
+//                     String[] split = sCoordinates[i].split(":");
+//                     nCoordinates[i*2]     = Integer.parseInt(split[0]);
+//                     nCoordinates[(i*2)+1] = Integer.parseInt(split[1]);
+//                  }
+//
+//                  for(int i=0;i<nCoordinates.length;i+=2){
+//                     JLabel temp = new JLabel(new ImageIcon(sheep));
+//                     pnl.add(temp);
+//                     temp.setLocation(nCoordinates[i], nCoordinates[i+1]);
+//                     temp.setSize(10, 10);
+//                  }
                }
             }
          }
       } catch (IOException | NumberFormatException ex) {
          System.err.println(ex.getMessage());
-       }
+      }
    }
 
 

@@ -43,6 +43,7 @@ public class SocketSheepExample2Server {
       }
       
       StringBuilder sb = new StringBuilder();
+      sb.append("IMAGE");
       
       sheep.values().stream().forEach((v)->{
          sb.append(v.getX());
@@ -74,8 +75,11 @@ public class SocketSheepExample2Server {
             while (!getValidClientName(input, pw)) {}
             
             pw.println("NAMEACCEPTED");
+            
             while (true) {
                String clientInput = input.readLine();
+               System.out.println("Got input from client: "+clientInput);
+               
                int i = clientInput.lastIndexOf(":");
                sendImageToAllClients(clientInput, i);
             }
@@ -88,7 +92,6 @@ public class SocketSheepExample2Server {
          String newImage = render(new String[]{clientInput.substring(0, i), clientInput.substring(i+2)});
          
          clientPrintWriters.stream().forEach((printWriter)->{
-            printWriter.println("IMAGE");
             printWriter.println(newImage);
          });
       }
