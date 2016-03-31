@@ -6,6 +6,7 @@ import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
@@ -26,19 +27,13 @@ public class SocketSheepExample2Server {
    public static void main(String[] args) {
       try {
          sheep      = new HashMap<>();
-         sheepImage = ImageIO.read(new File("src/images/Sheep.jpg"));
+         sheepImage = ImageIO.read(new File("src\\images\\Sheep.jpg"));
          canvas     = new BufferedImage(1000, 1000, BufferedImage.TYPE_3BYTE_BGR);
          
          ServerSocket serverSocket = new ServerSocket(PORT);
          System.out.println("Server started!\n");
          while (true) {
             new Thread(new Handler(serverSocket.accept())).start();
-         
-//            Graphics2D tempImage = canvas.createGraphics();
-//            sheep.values().stream().forEach((v)->{
-//               tempImage.drawImage(sheepImage, v.getX(), v.getY(), null);
-//            });
-            
             System.out.println("Client accepted");
          }
       } catch (IOException ex) {
@@ -62,11 +57,34 @@ public class SocketSheepExample2Server {
       sheep.values().stream().forEach((v)->{
          tempImage.drawImage(sheepImage, v.getX(), v.getY(), null);
       });
-
+   }
+   private static String render2(String[] clientInput) {
+      String name = clientInput[0];
+      String direction = clientInput[1];
+      
+      Coordinates sheepCoor = sheep.get(name);
+      if(sheepCoor==null){
+         System.err.println("Sheep "+name+" has been removed!");
+      }else{
+         sheepCoor.updateLocation(Constants.valueOf(direction));
+      }
+      
+      //Implement Remove images from canvas
+      StringBuilder sb = new StringBuilder();
+      
+      sheep.values().stream().forEach((v)->{
+//         tempImage.drawImage(sheepImage, v.getX(), v.getY(), null);
+         sb.append(v.getX());
+         sb.append(":");
+         sb.append(v.getY());
+         sb.append(",");
+      });
+      
+      return sb.toString();
    }
 
    private static class Handler implements Runnable {
-      private Socket socket;
+      private final Socket socket;
 
       private BufferedReader input;
       private OutputStream outputStream;
@@ -90,7 +108,25 @@ public class SocketSheepExample2Server {
             while (true) {
                String clientInput = input.readLine();
                int i = clientInput.lastIndexOf(":");
-               render(new String[]{clientInput.substring(0, i), clientInput.substring(i+2)});
+               
+               OutputStream out = socket.getOutputStream();
+//               FileInputStream file = new FileInputStream(new File("src/images/Sheep.jpg"));
+
+//               byte buffer[] = new byte[1024];
+//               int LENGTH = buffer.length;
+//               int count;
+
+               out.write("IMAGE".getBytes());
+               
+//               while ((count = file.read(buffer)) != -1){
+//                   out.write(buffer);
+//               }
+               
+               out.write(render2(new String[]{clientInput.substring(0, i), clientInput.substring(i+2)})
+                  .getBytes());
+               
+               out.flush();
+               close(out);
             }
 
 //            byte[] sizeAr = new byte[4];

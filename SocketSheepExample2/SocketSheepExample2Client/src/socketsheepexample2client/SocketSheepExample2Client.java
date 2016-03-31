@@ -11,10 +11,15 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.border.LineBorder;
@@ -36,13 +41,17 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    private final JButton jbLeft = new JButton(LEFT);
    private final JButton jbRight = new JButton(RIGHT);
    
-   private JPanel pnl = new JPanel();
+   private final JPanel pnl = new JPanel();
    
-   private ArrayList<JButton> buttons;
+   private final ArrayList<JButton> buttons;
    
    private BufferedReader in;
    private PrintWriter pw;
-
+   
+   private BufferedImage sheep;
+   private JLabel sheepLabel;
+   
+   
    public SocketSheepExample2Client() throws IOException {
       super("SHEEP");
 
@@ -61,6 +70,9 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       c.gridheight = 1;
       c.gridwidth = 3;
       add(pnl, c);
+
+      sheep      = ImageIO.read(new File("src\\images\\Sheep.jpg"));
+      sheepLabel = new JLabel(new ImageIcon(sheep));
       
       addButton(c, jbUp, GridBagConstraints.HORIZONTAL, 1, 1, 1, 1);
       addButton(c, jbDown, GridBagConstraints.HORIZONTAL, 1, 2, 1, 1);
@@ -98,21 +110,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       try {
          Socket socket = new Socket("::1", PORT);
          OutputStream outputStream = socket.getOutputStream();
-            // <editor-fold desc="Old Code">
-                /*Socket socket = new Socket("::1", PORT);
-          OutputStream outputStream = socket.getOutputStream();
-
-          File f = new File("src/images/Sheep.jpg");
-          BufferedImage image = ImageIO.read(f);
-          ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-          ImageIO.write(image, "jpg", byteArrayOutputStream);
-          byte[] size = ByteBuffer.allocate(4).putInt(byteArrayOutputStream.size()).array();
-
-          outputStream.write(size);
-          outputStream.write(byteArrayOutputStream.toByteArray());
-          outputStream.flush();
-          socket.close();*/
-         //</editor-fold>
          
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
          pw = new PrintWriter(socket.getOutputStream(), true);
@@ -124,10 +121,29 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
                 pw.println(getClientName());
             } else if (input.startsWith("NAMEACCEPTED")) {
                 enableButtons();
+            } else if (input.startsWith("IMAGE")){
+               System.out.println("IMAGE");
+               String[] sCoordinates = input.substring(5).split(",");
+               int[] nCoordinates = new int[sCoordinates.length*2];
+               
+               for(int i=0;i<sCoordinates.length;i++){
+                  String[] split = sCoordinates[i].split(":");
+                  nCoordinates[i*2]     = Integer.parseInt(split[0]);
+                  nCoordinates[(i*2)+1] = Integer.parseInt(split[1]);
+               }
+               
+               for(int i=0;i<nCoordinates.length;i+=2){
+                  
+               }
+               
+//               for(String coordinate : sCoordinates){
+//                  String[] split = coordinate.split(":");
+//                  int x = Integer.parseInt(split[0]);
+//                  int y = Integer.parseInt(split[1]);
+//               }
+//               BufferedImage img = ImageIO.read(new File(input.substring("IMAGE".length())));
+//               pnl.add(new JLabel(new ImageIcon(img)));
             }
-            
-//////               byte[] buffer = direction.getBytes();
-//////               out.write(buffer);
          }
       } catch (Exception ex) {
          System.err.println(ex.getMessage());
@@ -149,6 +165,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       }
       
       pw.println(clientName+": "+direction);
+      direction = "";
    }
 
    /**
