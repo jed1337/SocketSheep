@@ -54,7 +54,9 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    
    public SocketSheepExample2Client() throws IOException {
       super("SHEEP");
-
+      sheep      = ImageIO.read(new File("src\\images\\Sheep.jpg"));
+      sheepLabel = new JLabel(new ImageIcon(sheep));
+      
 //<editor-fold defaultstate="collapsed" desc="Add GUI">
       buttons = new ArrayList<>();
       
@@ -63,16 +65,13 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       pnl.setPreferredSize(new Dimension(500,420));
       pnl.setBorder(new LineBorder(Color.black, 1));
       
-      c.fill = GridBagConstraints.HORIZONTAL;
+      c.fill = GridBagConstraints.VERTICAL;
       c.weightx = 0.5;
       c.gridx = 0;
       c.gridy = 0;
       c.gridheight = 1;
       c.gridwidth = 3;
       add(pnl, c);
-
-      sheep      = ImageIO.read(new File("src\\images\\Sheep.jpg"));
-      sheepLabel = new JLabel(new ImageIcon(sheep));
       
       addButton(c, jbUp, GridBagConstraints.HORIZONTAL, 1, 1, 1, 1);
       addButton(c, jbDown, GridBagConstraints.HORIZONTAL, 1, 2, 1, 1);
@@ -81,12 +80,13 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
 
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       setResizable(false);
-      setPreferredSize(new Dimension(500, 500));
+      setPreferredSize(new Dimension(600, 600));
       pack();
       setLocationRelativeTo(null);
       setVisible(true);
+      System.out.println("");
 //</editor-fold>
-      
+       
       setup();
    }
 
@@ -109,43 +109,39 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    private void setup() throws IOException {
       try {
          Socket socket = new Socket("::1", PORT);
-         OutputStream outputStream = socket.getOutputStream();
-         
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
          pw = new PrintWriter(socket.getOutputStream(), true);
-//         
+         
+         System.out.println("");
          while (true) {
             String input = in.readLine();
             System.out.println(input);
-            if (input.startsWith("SUBMITNAME")) {
-                pw.println(getClientName());
-            } else if (input.startsWith("NAMEACCEPTED")) {
-                enableButtons();
-            } else if (input.startsWith("IMAGE")){
-               System.out.println("IMAGE");
-               String[] sCoordinates = input.substring(5).split(",");
-               int[] nCoordinates = new int[sCoordinates.length*2];
-               
-               for(int i=0;i<sCoordinates.length;i++){
-                  String[] split = sCoordinates[i].split(":");
-                  nCoordinates[i*2]     = Integer.parseInt(split[0]);
-                  nCoordinates[(i*2)+1] = Integer.parseInt(split[1]);
+            if(input!=null){
+               if (input.startsWith("SUBMITNAME")) {
+                   pw.println(getClientName());
+               } else if (input.startsWith("NAMEACCEPTED")) {
+                   enableButtons();
+               } else if (input.startsWith("IMAGE")){
+                  System.out.println("IMAGE");
+                  String[] sCoordinates = input.substring(5).split(",");
+                  int[] nCoordinates = new int[sCoordinates.length*2];
+
+                  for(int i=0;i<sCoordinates.length;i++){
+                     String[] split = sCoordinates[i].split(":");
+                     nCoordinates[i*2]     = Integer.parseInt(split[0]);
+                     nCoordinates[(i*2)+1] = Integer.parseInt(split[1]);
+                  }
+
+                  for(int i=0;i<nCoordinates.length;i+=2){
+                     JLabel temp = new JLabel(new ImageIcon(sheep));
+                     pnl.add(temp);
+                     temp.setLocation(nCoordinates[i], nCoordinates[i+1]);
+                     temp.setSize(10, 10);
+                  }
                }
-               
-               for(int i=0;i<nCoordinates.length;i+=2){
-                  
-               }
-               
-//               for(String coordinate : sCoordinates){
-//                  String[] split = coordinate.split(":");
-//                  int x = Integer.parseInt(split[0]);
-//                  int y = Integer.parseInt(split[1]);
-//               }
-//               BufferedImage img = ImageIO.read(new File(input.substring("IMAGE".length())));
-//               pnl.add(new JLabel(new ImageIcon(img)));
             }
          }
-      } catch (Exception ex) {
+      } catch (IOException | NumberFormatException ex) {
          System.err.println(ex.getMessage());
       }
    }
@@ -165,7 +161,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       }
       
       pw.println(clientName+": "+direction);
-      direction = "";
    }
 
    /**
@@ -187,6 +182,5 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    
    public static void main(String[] args) throws IOException {
       new SocketSheepExample2Client();
-//      client.run();
    }
 }
