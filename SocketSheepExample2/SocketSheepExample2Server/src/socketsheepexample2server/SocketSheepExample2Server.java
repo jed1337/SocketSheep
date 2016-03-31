@@ -1,45 +1,29 @@
 package socketsheepexample2server;
 
-import java.awt.Graphics;
-import java.awt.Graphics2D;
-import java.awt.image.BufferedImage;
 import java.io.BufferedReader;
 import java.io.Closeable;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Map;
-import javax.imageio.ImageIO;
 
 public class SocketSheepExample2Server {
    private final static int PORT = 4096;
    private static HashMap<String, Coordinates> sheep;
+   private static ArrayList<PrintWriter> clientPrintWriters;
    
-   private static BufferedImage sheepImage;
-   private static BufferedImage canvas;
-
    public static void main(String[] args) {
       try {
-         sheep      = new HashMap<>();
-         //sheepImage = ImageIO.read(new File("src\\images\\Sheep.jpg"));
-         sheepImage = ImageIO.read(new File("src/images/Sheep.jpg"));
-         canvas     = new BufferedImage(1000, 1000, BufferedImage.TYPE_3BYTE_BGR);
+         sheep               = new HashMap<>();
+         clientPrintWriters = new ArrayList<>();
          
          ServerSocket serverSocket = new ServerSocket(PORT);
          System.out.println("Server started!\n");
          while (true) {
             new Thread(new Handler(serverSocket.accept())).start();
-         
-            Graphics2D tempImage = canvas.createGraphics();
-            sheep.values().stream().forEach((v)->{
-               tempImage.drawImage(sheepImage, v.getX(), v.getY(), null);
-            });
-            
             System.out.println("Client accepted");
          }
       } catch (IOException ex) {
@@ -47,7 +31,7 @@ public class SocketSheepExample2Server {
       }
    }
 
-   private static void render(String[] clientInput) {
+   private static String render(String[] clientInput) {
       String name = clientInput[0];
       String direction = clientInput[1];
       
@@ -58,19 +42,23 @@ public class SocketSheepExample2Server {
          sheepCoor.updateLocation(Constants.valueOf(direction));
       }
       
-      //Implement Remove images from canvas
-      Graphics2D tempImage = canvas.createGraphics();
+      StringBuilder sb = new StringBuilder();
+      sb.append("IMAGE");
+      
       sheep.values().stream().forEach((v)->{
-         tempImage.drawImage(sheepImage, null, v.getX(), v.getY());
+         sb.append(v.getX());
+         sb.append(":");
+         sb.append(v.getY());
+         sb.append(",");
       });
-
+      
+      return sb.toString();
    }
 
    private static class Handler implements Runnable {
-      private Socket socket;
+      private final Socket socket;
 
       private BufferedReader input;
-      private OutputStream outputStream;
       private PrintWriter pw;
 
       public Handler(Socket socket) {
@@ -81,30 +69,31 @@ public class SocketSheepExample2Server {
       public void run() {
          try {
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            outputStream = socket.getOutputStream();
-            pw = new PrintWriter(outputStream, true);
-
-            while (!getValidClientName(input, pw)) {
-            }
-
+//            outputStream = socket.getOutputStream();
+            pw = new PrintWriter(socket.getOutputStream(), true);
+            clientPrintWriters.add(pw);
+            while (!getValidClientName(input, pw)) {}
+            
+            pw.println("NAMEACCEPTED");
+            
             while (true) {
                String clientInput = input.readLine();
+               System.out.println("Got input from client: "+clientInput);
+               
                int i = clientInput.lastIndexOf(":");
-               render(new String[]{clientInput.substring(0, i), clientInput.substring(i)});
+               sendImageToAllClients(clientInput, i);
             }
-
-//            byte[] sizeAr = new byte[4];
-//            input.read(sizeAr);
-//            int size = ByteBuffer.wrap(sizeAr).asIntBuffer().get();
-//            byte[] imageAr = new byte[size];
-//            input.read(imageAr);
-//            BufferedImage image = ImageIO.read(new ByteArrayInputStream(imageAr));
-//            System.out.println("Received " + image.getHeight() + "x" + image.getWidth() + ": " + System.currentTimeMillis());
-//            ImageIO.write(image, "jpg", new File("Image-" + System.currentTimeMillis() + ".jpg"));
-//            input.close();
          } catch (IOException ex) {
             System.err.println(ex.getMessage());
          }
+      }
+
+      private void sendImageToAllClients(String clientInput, int i) {
+         String newImage = render(new String[]{clientInput.substring(0, i), clientInput.substring(i+2)});
+         
+         clientPrintWriters.stream().forEach((printWriter)->{
+            printWriter.println(newImage);
+         });
       }
 
       private void close(Closeable c) {
@@ -127,7 +116,7 @@ public class SocketSheepExample2Server {
             valid = true;
             pw.println("SUBMITNAME");
             String name = input.readLine();
-            if (name == null) {
+            if (name.isEmpty() || name == null) {
                return false;
             }
             synchronized (name) {
