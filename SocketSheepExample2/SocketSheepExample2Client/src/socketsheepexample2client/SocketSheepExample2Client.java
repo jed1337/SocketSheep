@@ -3,21 +3,21 @@ package socketsheepexample2client;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.io.IOException;
-import java.net.Socket;
-import javax.swing.JButton;
-import javax.swing.JFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Random;
-import javax.swing.JOptionPane;
 import javax.swing.border.LineBorder;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 public class SocketSheepExample2Client extends JFrame implements ActionListener {
    private final static int PORT = 4096;
@@ -79,8 +79,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       
       System.out.println("");
    }
-   private void addComponent(GridBagConstraints c, Component component,
-                                                   int fill, int x, int y, int height, int width) {
+   private void addComponent(GridBagConstraints c, Component component,int fill, 
+                              int x, int y, int height, int width) {
       c.fill = fill;
       c.weightx = 0.5;
       c.gridx = x;
@@ -90,8 +90,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       
       add(component, c);
    }
-   private void addButton(GridBagConstraints c, JButton button,
-                                                int fill, int x, int y, int height, int width) {
+   private void addButton(GridBagConstraints c, JButton button,int fill, 
+                              int x, int y, int height, int width) {
       
       addComponent(c, button, fill, x, y, height, width);
       
@@ -107,18 +107,16 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
          pw = new PrintWriter(socket.getOutputStream(), true);
          
-         System.out.println("");
          while (true) {
             String input = in.readLine();
             System.out.println(input);
             
             if(input!=null){
                if (input.startsWith("SUBMITNAME")) {
-                   pw.println(getClientName());
+                  pw.println(getClientName());
                } else if (input.startsWith("NAMEACCEPTED")) {
-                   enableButtons();
-               } 
-               else if (input.startsWith("IMAGE")){
+                  enableButtons();
+               } else if (input.startsWith("IMAGE")){
                   handleImages(input);
                }
             }
