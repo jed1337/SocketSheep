@@ -14,36 +14,37 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.border.LineBorder;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
-public class SocketSheepExample2Client extends JFrame implements ActionListener {
+public class SocketSheepExample2Client extends JFrame implements ActionListener, Runnable {
    private final static int PORT = 4096;
    private final static String UP = "UP";
    private final static String DOWN = "DOWN";
    private final static String LEFT = "LEFT";
    private final static String RIGHT = "RIGHT";
 
-   private final Random rand;
-   private String clientName;
-   
    private final JButton jbUp   = new JButton(UP);
    private final JButton jbDown = new JButton(DOWN);
    private final JButton jbLeft = new JButton(LEFT);
    private final JButton jbRight = new JButton(RIGHT);
    private final ArrayList<JButton> buttons;
    
+   private final Random rand;
+   private String clientName;
+   
+   private final MyPanel myPanel;
    private BufferedReader in;
    private PrintWriter pw;
-   private final MyPanel myPanel;
    
-   public SocketSheepExample2Client(String clientName) throws IOException{
+   private final boolean randomMovements;
+   
+   public SocketSheepExample2Client(boolean randomMovements, String clientName) throws IOException {
       super("SHEEP");
-      this.clientName = clientName;
+      this.randomMovements = randomMovements;
+      this.clientName      = clientName;
 
       String filePath = "src\\images\\Sheep.jpg";
       if(System.getProperty("os.name").contains("mac")){
@@ -55,13 +56,12 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       rand = new Random();
 
       setupGUI();
-      setupProtocolReceiver();
    }
    
-   public SocketSheepExample2Client() throws IOException {
-      this(null);
+   public SocketSheepExample2Client(boolean randomMovements) throws IOException {
+      this(randomMovements, null);
    }
-   
+
 //<editor-fold defaultstate="collapsed" desc="Gui Things">
    
    private void setupGUI() {
@@ -107,8 +107,9 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       buttons.add(button);
    }
 //</editor-fold>
-   
-   private void setupProtocolReceiver() throws IOException {
+
+   @Override
+   public void run(){
       try {
          Socket socket = new Socket("::1", PORT);
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
@@ -126,6 +127,9 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
                } else if (input.startsWith("IMAGE")){
                   handleImages(input);
                }
+            }
+            if(randomMovements){
+               randomMovement();
             }
          }
       } catch (IOException | NumberFormatException ex) {
@@ -149,7 +153,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
 
    private void handleImages(String input) throws NumberFormatException {
       String[] sCoordinates = input.substring(5).split(",");
-      System.out.println("Size: "+sCoordinates.length);
       int[] nCoordinates = new int[sCoordinates.length*2];
       
       for(int i=0;i<sCoordinates.length;i++){
@@ -190,7 +193,11 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    }
    
    public static void main(String[] args) throws IOException {
-      new SocketSheepExample2Client();
+      int SHEEP_LIMIT         = 5;
+      boolean randomMovements = true;
+      
+      for(int i=0;i<SHEEP_LIMIT;i++){
+         new Thread(new SocketSheepExample2Client(randomMovements, "Client "+i)).start();
+      }
    }
-   
 }
