@@ -121,7 +121,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
                } else if (input.startsWith("NAMEACCEPTED")) {
                    enableButtons();
                } 
-               else if (input.startsWith("IMAGE")){
+               else if (input.startsWith("IMAGE")){ 
 //                  System.out.println("IMAGE");
                   String[] sCoordinates = input.substring(5).split(",");
                   System.out.println("Size: "+sCoordinates.length);
