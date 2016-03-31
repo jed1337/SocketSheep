@@ -3,22 +3,21 @@ package socketsheepexample2client;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
-import java.awt.GridBagConstraints;
-import java.awt.GridBagLayout;
-import java.io.IOException;
-import java.net.Socket;
-import javax.swing.JButton;
-import javax.swing.JFrame;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.Socket;
 import java.util.ArrayList;
-import javax.swing.ImageIcon;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
+import java.util.Random;
 import javax.swing.border.LineBorder;
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 public class SocketSheepExample2Client extends JFrame implements ActionListener {
    private final static int PORT = 4096;
@@ -27,6 +26,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    private final static String LEFT = "LEFT";
    private final static String RIGHT = "RIGHT";
 
+   private final Random rand;
    private String clientName;
    
    private final JButton jbUp   = new JButton(UP);
@@ -38,23 +38,26 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
    private BufferedReader in;
    private PrintWriter pw;
    private final MyPanel myPanel;
-   private static String OS = System.getProperty("os.name");
+   
+   public SocketSheepExample2Client(String clientName) throws IOException{
+      super("SHEEP");
+      this.clientName = clientName;
+
+      String filePath = "src\\images\\Sheep.jpg";
+      if(System.getProperty("os.name").contains("mac")){
+         filePath = filePath.replaceAll("\\\\", "/");
+      }
+      myPanel = new MyPanel(filePath);
+
+      buttons = new ArrayList<>();
+      rand = new Random();
+
+      setupGUI();
+      setupProtocolReceiver();
+   }
    
    public SocketSheepExample2Client() throws IOException {
-      super("SHEEP");
-      
-        String s = "";
-        if(OS.contains("Windows")){
-            s = "\\";
-        } else if(OS.contains("Mac")){
-            s = "/";
-        }
-
-        buttons    = new ArrayList<>();
-        myPanel    = new MyPanel("src"+s+"images"+s+"Sheep.jpg");
-
-        setupGUI();
-        setupProtocolReceiver();
+      this(null);
    }
    
 //<editor-fold defaultstate="collapsed" desc="Gui Things">
@@ -81,8 +84,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       
       System.out.println("");
    }
-   private void addComponent(GridBagConstraints c, Component component,
-                                                   int fill, int x, int y, int height, int width) {
+   private void addComponent(GridBagConstraints c, Component component,int fill, 
+                              int x, int y, int height, int width) {
       c.fill = fill;
       c.weightx = 0.5;
       c.gridx = x;
@@ -92,8 +95,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       
       add(component, c);
    }
-   private void addButton(GridBagConstraints c, JButton button,
-                                                int fill, int x, int y, int height, int width) {
+   private void addButton(GridBagConstraints c, JButton button,int fill, 
+                              int x, int y, int height, int width) {
       
       addComponent(c, button, fill, x, y, height, width);
       
@@ -109,18 +112,16 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
          pw = new PrintWriter(socket.getOutputStream(), true);
          
-         System.out.println("");
          while (true) {
             String input = in.readLine();
             System.out.println(input);
             
             if(input!=null){
                if (input.startsWith("SUBMITNAME")) {
-                   pw.println(getClientName());
+                  pw.println(getClientName());
                } else if (input.startsWith("NAMEACCEPTED")) {
-                   enableButtons();
-               } 
-               else if (input.startsWith("IMAGE")){
+                  enableButtons();
+               } else if (input.startsWith("IMAGE")){
                   handleImages(input);
                }
             }
@@ -134,10 +135,13 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
     * Prompt for and return the desired screen clientName.
     */
    private String getClientName() {
-      clientName = JOptionPane.showInputDialog(this,
-              "Choose a screen name:",
-              "Screen name selection",
-              JOptionPane.PLAIN_MESSAGE);
+      if(clientName==null){
+         clientName = JOptionPane.showInputDialog(this,
+                 "Choose a screen name:",
+                 "Screen name selection",
+                 JOptionPane.PLAIN_MESSAGE);
+      }
+      this.setTitle(this.getTitle()+": "+clientName);
       return clientName;
    }
 
@@ -169,6 +173,10 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener 
       }
       
       pw.println(clientName+": "+direction);
+   }
+   
+   private void randomMovement(){
+      buttons.get(rand.nextInt(buttons.size())).doClick();
    }
 
    private void enableButtons() {
