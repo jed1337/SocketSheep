@@ -5,7 +5,6 @@ import java.awt.Dimension;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.Socket;
 import javax.swing.JButton;
 import javax.swing.JFrame;

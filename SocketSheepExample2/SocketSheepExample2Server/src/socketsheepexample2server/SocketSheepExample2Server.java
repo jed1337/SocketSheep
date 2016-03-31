@@ -4,7 +4,6 @@ import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -14,12 +13,12 @@ import java.util.HashMap;
 public class SocketSheepExample2Server {
    private final static int PORT = 4096;
    private static HashMap<String, Coordinates> sheep;
-   private static ArrayList<OutputStream> clientOutputStreams;
+   private static ArrayList<PrintWriter> clientPrintWriters;
    
    public static void main(String[] args) {
       try {
          sheep               = new HashMap<>();
-         clientOutputStreams = new ArrayList<>();
+         clientPrintWriters = new ArrayList<>();
          
          ServerSocket serverSocket = new ServerSocket(PORT);
          System.out.println("Server started!\n");
@@ -71,22 +70,27 @@ public class SocketSheepExample2Server {
             input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 //            outputStream = socket.getOutputStream();
             pw = new PrintWriter(socket.getOutputStream(), true);
-
+            clientPrintWriters.add(pw);
             while (!getValidClientName(input, pw)) {}
             
             pw.println("NAMEACCEPTED");
             while (true) {
                String clientInput = input.readLine();
                int i = clientInput.lastIndexOf(":");
-               
-               pw.println("IMAGE");
-               pw.println(render(new String[]{clientInput.substring(0, i), clientInput.substring(i+2)}));
-               
-//               close(out);
+               sendImageToAllClients(clientInput, i);
             }
          } catch (IOException ex) {
             System.err.println(ex.getMessage());
          }
+      }
+
+      private void sendImageToAllClients(String clientInput, int i) {
+         String newImage = render(new String[]{clientInput.substring(0, i), clientInput.substring(i+2)});
+         
+         clientPrintWriters.stream().forEach((printWriter)->{
+            printWriter.println("IMAGE");
+            printWriter.println(newImage);
+         });
       }
 
       private void close(Closeable c) {
