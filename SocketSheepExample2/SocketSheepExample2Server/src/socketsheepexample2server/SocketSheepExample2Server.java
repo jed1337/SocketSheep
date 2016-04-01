@@ -77,10 +77,13 @@ public class SocketSheepExample2Server {
             pw.println("NAMEACCEPTED");
             
             while (true) {
-               String clientInput = input.readLine();
-               System.out.println("Got input from client: "+clientInput);
+                long start = System.currentTimeMillis();
+                String clientInput = input.readLine();
+                //System.out.println("Got input from client: "+clientInput);
                
-               sendUpdatedImageToAllClients(clientInput, clientInput.lastIndexOf(":"));
+                sendUpdatedImageToAllClients(clientInput, clientInput.lastIndexOf(":"));
+                long end = System.currentTimeMillis() - start;
+                System.out.println(end+"ms");
             }
          } catch (IOException ex) {
             System.err.println(ex.getMessage());
