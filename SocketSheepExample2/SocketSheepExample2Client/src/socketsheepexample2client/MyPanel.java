@@ -11,12 +11,18 @@ import javax.swing.JPanel;
 public class MyPanel extends JPanel{
    private final BufferedImage sheep;
    private int[] nCoordinates;
+   private String clientName;
 
    public MyPanel(String filePath) throws IOException {
       this.sheep        = ImageIO.read(new File(filePath));
       this.nCoordinates = new int[0];
+      this.clientName   = "No Name";
       
       this.setBackground(Color.WHITE);
+   }
+   
+   public void setClientName(String name){
+      this.clientName = name;
    }
    
    public void updateCoordinates(int[] nCoordinates){
@@ -29,7 +35,11 @@ public class MyPanel extends JPanel{
       super.paintComponent(g);
 
       for (int i = 0; i < nCoordinates.length; i += 2) {
-         g.drawImage(sheep, nCoordinates[i], nCoordinates[i + 1], this);
+         int x = nCoordinates[i];
+         int y = nCoordinates[i + 1];
+         
+         g.drawImage(sheep,x, y , this);
+         g.drawString(clientName, x, y);
       }
    }
 }

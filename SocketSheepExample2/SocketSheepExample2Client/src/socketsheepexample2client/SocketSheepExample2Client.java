@@ -41,6 +41,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    
    private final boolean randomMovements;
    
+   private long start;
+   
    public SocketSheepExample2Client(boolean randomMovements, String clientName) throws IOException {
       super("SHEEP");
       this.randomMovements = randomMovements;
@@ -124,7 +126,14 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
                } else if (input.startsWith("NAMEACCEPTED")) {
                   enableButtons();
                } else if (input.startsWith("IMAGE")){
+                  int startParen = input.indexOf("(")+1;
+                  int endParen = input.indexOf(")");
+                  
                   handleImages(input);
+                  
+                  if(clientName.equals(input.substring(startParen, endParen))){
+                     System.out.println(clientName+" latency: "+ (System.currentTimeMillis() - start)+" ms");
+                  }
                }
             }
             if(randomMovements){
@@ -147,11 +156,12 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
                  JOptionPane.PLAIN_MESSAGE);
       }
       this.setTitle(this.getTitle()+": "+clientName);
+      this.myPanel.setClientName(clientName);
       return clientName;
    }
 
    private void handleImages(String input) throws NumberFormatException {
-      String[] sCoordinates = input.substring(5).split(",");
+      String[] sCoordinates = input.substring(input.indexOf(")")+1).split(",");
       int[] nCoordinates = new int[sCoordinates.length*2];
       
       for(int i=0;i<sCoordinates.length;i++){
@@ -175,7 +185,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       } else if (e.getSource() == jbRight) {
          direction = RIGHT;
       }
-      
+      start = System.currentTimeMillis();
       pw.println(clientName+": "+direction);
    }
    
@@ -198,7 +208,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       SocketSheepExample2Client sheep = new SocketSheepExample2Client(randomMovements, "Client -1");
       sheep.setVisible(true);
       new Thread(sheep).start();
-         
+      
       for(int i=0;i<SHEEP_LIMIT;i++){
          new Thread(new SocketSheepExample2Client(randomMovements, "Client "+i)).start();
       }
