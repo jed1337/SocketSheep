@@ -118,7 +118,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          
          while (true) {
             String input = in.readLine();
-            //System.out.println(input);
             
             if(input!=null){
                if (input.startsWith("SUBMITNAME")) {
@@ -132,6 +131,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
                   handleImages(input);
                   
                   if(clientName.equals(input.substring(startParen, endParen))){
+                     System.out.println(input);
                      System.out.println(clientName+" latency: "+ (System.currentTimeMillis() - start)+" ms");
                   }
                }
@@ -201,16 +201,25 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       jbDown.doClick();
    }
    
-   public static void main(String[] args) throws IOException {
-      int SHEEP_LIMIT         = 10;
-      boolean randomMovements = true;
-      
-      SocketSheepExample2Client sheep = new SocketSheepExample2Client(randomMovements, "Client -1");
+   public static void singleClient() throws IOException{
+      SocketSheepExample2Client sheep = new SocketSheepExample2Client(false);
       sheep.setVisible(true);
       new Thread(sheep).start();
-      
-      for(int i=0;i<SHEEP_LIMIT;i++){
-         new Thread(new SocketSheepExample2Client(randomMovements, "Client "+i)).start();
+   }
+   
+
+   private static void multiClient(boolean randomMovements1, int SHEEP_LIMIT) throws IOException {
+      SocketSheepExample2Client sheep = new SocketSheepExample2Client(randomMovements1, "Client Start");
+      sheep.setVisible(true);
+      new Thread(sheep).start();
+      for (int i = 0; i<SHEEP_LIMIT; i++) {
+         new Thread(new SocketSheepExample2Client(randomMovements1, "Client "+i)).start();
       }
+   }
+   
+   public static void main(String[] args) throws IOException {
+//      singleClient();
+      
+      multiClient(true, 10);
    }
 }

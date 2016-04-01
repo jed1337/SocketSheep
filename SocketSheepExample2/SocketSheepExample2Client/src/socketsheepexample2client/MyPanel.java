@@ -39,7 +39,7 @@ public class MyPanel extends JPanel{
          int y = nCoordinates[i + 1];
          
          g.drawImage(sheep,x, y , this);
-         g.drawString(clientName, x, y);
+//         g.drawString(clientName, x, y);
       }
    }
 }
