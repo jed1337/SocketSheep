@@ -7,7 +7,8 @@ public class Coordinates {
    private final int move = 50;
    
    public Coordinates(){
-      this(0,0);
+//      this(0,0);
+      this(300,300);
    }
 
    public Coordinates(int x, int y) {

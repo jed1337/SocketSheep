@@ -130,7 +130,7 @@ public class SocketSheepExample2Server {
                }
             }
          }
-         sheep.put(name, new Coordinates(0, 0));
+         sheep.put(name, new Coordinates());
          return name;
       }
       private void close(Closeable c) {
