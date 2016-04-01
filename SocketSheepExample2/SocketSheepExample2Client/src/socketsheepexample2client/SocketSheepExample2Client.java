@@ -82,9 +82,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       setPreferredSize(new Dimension(600, 600));
       pack();
       setLocationRelativeTo(null);
-      setVisible(true);
-      
-      System.out.println("");
+//      setVisible(true);
    }
    private void addComponent(GridBagConstraints c, Component component,int fill, 
                               int x, int y, int height, int width) {
@@ -117,7 +115,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          
          while (true) {
             String input = in.readLine();
-            System.out.println(input);
+//            System.out.println(input);
             
             if(input!=null){
                if (input.startsWith("SUBMITNAME")) {
@@ -193,9 +191,13 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    }
    
    public static void main(String[] args) throws IOException {
-      int SHEEP_LIMIT         = 5;
+      int SHEEP_LIMIT         = 50;
       boolean randomMovements = true;
       
+      SocketSheepExample2Client sheep = new SocketSheepExample2Client(randomMovements, "Client -1");
+      sheep.setVisible(true);
+      new Thread(sheep).start();
+         
       for(int i=0;i<SHEEP_LIMIT;i++){
          new Thread(new SocketSheepExample2Client(randomMovements, "Client "+i)).start();
       }

@@ -85,6 +85,7 @@ public class SocketSheepExample2Server {
          } catch (IOException ex) {
             System.err.println(ex.getMessage());
             removeSheep(clientName);
+            clientPrintWriters.remove(pw);
          }
       }
 
