@@ -125,10 +125,10 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
                if (input.startsWith("SUBMITNAME")) {
                   pw.println(getClientName());
                } else if (input.startsWith("NAME_ACCEPTED")) {
+                  enableButtons();
                   String[] sCoordinates = input.substring(13).split(":");
                   xCoor = Integer.parseInt(sCoordinates[0]);
                   yCoor = Integer.parseInt(sCoordinates[1]);
-                  enableButtons();
                } else if (input.startsWith("IMAGE")){
                   handleImages(input);
                }
@@ -141,7 +141,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          System.err.println(ex.getMessage());
       }
    }
-   
    
    private void handleImages(String input) throws NumberFormatException {
       String[] movedClients = input.substring(5).split(",");
@@ -166,8 +165,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       int newYCoor = mcCoordinates[(i*2)+1];
       
       if(mcNames[i].equals(clientName)){
-         if(newXCoor != xCoor && newYCoor != yCoor){
-            System.out.println("Latency = "+ (System.currentTimeMillis()-start));
+         if(newXCoor != xCoor || newYCoor != yCoor){
+            System.out.println("Latency of " + clientName + ": "+(System.currentTimeMillis()-start)+"ms");
             start = 0;
          }
       }
@@ -179,9 +178,9 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private String getClientName() {
       if(clientName==null){
          clientName = JOptionPane.showInputDialog(this,
-                 "Choose a screen name:",
-                 "Screen name selection",
-                 JOptionPane.PLAIN_MESSAGE);
+            "Choose a screen name:",
+            "Screen name selection",
+            JOptionPane.PLAIN_MESSAGE);
       }
       this.setTitle(this.getTitle()+": "+clientName);
       return clientName;
@@ -221,18 +220,17 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       new Thread(sheep).start();
    }
    
-
-   private static void multiClient(boolean randomMovements1, int SHEEP_LIMIT) throws IOException {
-      SocketSheepExample2Client sheep = new SocketSheepExample2Client(randomMovements1, "Client Start");
+   private static void multiClient(boolean randomMovements, int SHEEP_LIMIT) throws IOException {
+      SocketSheepExample2Client sheep = new SocketSheepExample2Client(randomMovements, "Client Start");
       sheep.setVisible(true);
       new Thread(sheep).start();
       for (int i = 0; i<SHEEP_LIMIT; i++) {
-         new Thread(new SocketSheepExample2Client(randomMovements1, "Client "+i)).start();
+         new Thread(new SocketSheepExample2Client(randomMovements, "Client "+i)).start();
       }
    }
    
    public static void main(String[] args) throws IOException {
       singleClient();
-//      multiClient(true, 10);
+//      multiClient(true, 50);
    }
 }

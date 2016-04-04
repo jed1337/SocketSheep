@@ -8,16 +8,16 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class SocketSheepExample2Server {
    private final static int PORT = 4096;
-   private static HashMap<String, Coordinates> sheep;
+   private static ConcurrentHashMap<String, Coordinates> sheep;
    private static ArrayList<PrintWriter> clientPrintWriters;
 
    public static void main(String[] args) {
       try {
-         sheep = new HashMap<>();
+         sheep = new ConcurrentHashMap<>();
          clientPrintWriters = new ArrayList<>();
 
          ServerSocket serverSocket = new ServerSocket(PORT);
