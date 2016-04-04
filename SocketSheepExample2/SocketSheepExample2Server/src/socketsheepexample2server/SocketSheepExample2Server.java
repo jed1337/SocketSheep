@@ -83,7 +83,8 @@ public class SocketSheepExample2Server {
 
       private void sendImageProtocolToClients() {
          String newImage = updateImageProtocol();
-         
+         System.out.println(newImage);
+//         System.out.println("---");
          synchronized(clientPrintWriters){
             clientPrintWriters.stream().forEach((printWriter)->{
                printWriter.println(newImage);
@@ -126,11 +127,15 @@ public class SocketSheepExample2Server {
       private String updateImageProtocol() {
          StringBuilder sb = new StringBuilder();
          sb.append("IMAGE");
-         sb.append("(").append(clientName).append(")");
-         sheep.values().stream().forEach((v)->{
+         
+         sheep.forEach((k,v)->{
+            sb.append(k);
+            sb.append(":");
+            
             sb.append(v.getX());
             sb.append(":");
             sb.append(v.getY());
+            
             sb.append(",");
          });
 

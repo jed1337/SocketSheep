@@ -34,6 +34,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    
    private final Random rand;
    private String clientName;
+   private String sCoordinates;
    
    private final MyPanel myPanel;
    private BufferedReader in;
@@ -55,7 +56,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       myPanel = new MyPanel(filePath);
 
       buttons = new ArrayList<>();
-      rand = new Random();
+      rand    = new Random();
 
       setupGUI();
    }
@@ -125,15 +126,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
                } else if (input.startsWith("NAMEACCEPTED")) {
                   enableButtons();
                } else if (input.startsWith("IMAGE")){
-                  int startParen = input.indexOf("(")+1;
-                  int endParen = input.indexOf(")");
                   
                   handleImages(input);
-                  
-                  if(clientName.equals(input.substring(startParen, endParen))){
-                     System.out.println(input);
-                     System.out.println(clientName+" latency: "+ (System.currentTimeMillis() - start)+" ms");
-                  }
                }
             }
             if(randomMovements){
@@ -145,6 +139,23 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       }
    }
    
+   
+   private void handleImages(String input) throws NumberFormatException {
+      String[] movedClients = input.substring(5).split(",");
+
+      String[] mcNames      = new String[movedClients.length];
+      int[] mcCoordinates   = new int[movedClients.length*2];
+      
+      for(int i=0;i<movedClients.length;i++){
+         String[] split = movedClients[i].split(":");
+         mcNames[i]             = split[0];
+         mcCoordinates[(i*2)]   = Integer.parseInt(split[1]);
+         mcCoordinates[(i*2)+1] = Integer.parseInt(split[2]);
+      }
+
+      myPanel.updateCoordinates(mcNames, mcCoordinates);
+   }
+
    /**
     * Prompt for and return the desired screen clientName.
     */
@@ -156,21 +167,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
                  JOptionPane.PLAIN_MESSAGE);
       }
       this.setTitle(this.getTitle()+": "+clientName);
-      this.myPanel.setClientName(clientName);
       return clientName;
-   }
-
-   private void handleImages(String input) throws NumberFormatException {
-      String[] sCoordinates = input.substring(input.indexOf(")")+1).split(",");
-      int[] nCoordinates = new int[sCoordinates.length*2];
-      
-      for(int i=0;i<sCoordinates.length;i++){
-         String[] split = sCoordinates[i].split(":");
-         nCoordinates[i*2]     = Integer.parseInt(split[0]);
-         nCoordinates[(i*2)+1] = Integer.parseInt(split[1]);
-      }
-
-      myPanel.updateCoordinates(nCoordinates);
    }
 
    @Override
@@ -218,8 +215,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    }
    
    public static void main(String[] args) throws IOException {
-//      singleClient();
-      
-      multiClient(true, 10);
+      singleClient();
+//      multiClient(true, 10);
    }
 }
