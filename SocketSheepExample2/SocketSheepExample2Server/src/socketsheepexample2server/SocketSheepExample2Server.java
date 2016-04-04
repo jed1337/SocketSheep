@@ -56,7 +56,7 @@ public class SocketSheepExample2Server {
 
             clientName = getValidClientName(input, pw);
 
-            pw.println("NAMEACCEPTED");
+            pw.println("NAME_ACCEPTED"+sheep.get(clientName).toString());
 
             while (true) {
                String clientInput = input.readLine();

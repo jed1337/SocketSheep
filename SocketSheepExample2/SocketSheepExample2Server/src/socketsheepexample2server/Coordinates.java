@@ -43,6 +43,6 @@ public class Coordinates {
    
    @Override
    public String toString(){
-      return String.format("x: %d, y: %d\n", x, y);
+      return String.format("%d:%d", x, y);
    }
 }

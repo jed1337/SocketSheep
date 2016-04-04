@@ -34,7 +34,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    
    private final Random rand;
    private String clientName;
-   private String sCoordinates;
+   private int xCoor;
+   private int yCoor;
    
    private final MyPanel myPanel;
    private BufferedReader in;
@@ -82,9 +83,9 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       setResizable(false);
-      setPreferredSize(new Dimension(900, 600));
+      setPreferredSize(new Dimension(850, 600));
       pack();
-      setLocationRelativeTo(null);
+//      setLocationRelativeTo(null);
 //      setVisible(true);
       //System.out.println("");
    }
@@ -123,10 +124,12 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
             if(input!=null){
                if (input.startsWith("SUBMITNAME")) {
                   pw.println(getClientName());
-               } else if (input.startsWith("NAMEACCEPTED")) {
+               } else if (input.startsWith("NAME_ACCEPTED")) {
+                  String[] sCoordinates = input.substring(13).split(":");
+                  xCoor = Integer.parseInt(sCoordinates[0]);
+                  yCoor = Integer.parseInt(sCoordinates[1]);
                   enableButtons();
                } else if (input.startsWith("IMAGE")){
-                  
                   handleImages(input);
                }
             }
@@ -151,9 +154,23 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          mcNames[i]             = split[0];
          mcCoordinates[(i*2)]   = Integer.parseInt(split[1]);
          mcCoordinates[(i*2)+1] = Integer.parseInt(split[2]);
+         
+         checkLatency(mcNames, i, mcCoordinates);
       }
 
       myPanel.updateCoordinates(mcNames, mcCoordinates);
+   }
+
+   private void checkLatency(String[] mcNames, int i, int[] mcCoordinates) {
+      int newXCoor = mcCoordinates[(i*2)];
+      int newYCoor = mcCoordinates[(i*2)+1];
+      
+      if(mcNames[i].equals(clientName)){
+         if(newXCoor != xCoor && newYCoor != yCoor){
+            System.out.println("Latency = "+ (System.currentTimeMillis()-start));
+            start = 0;
+         }
+      }
    }
 
    /**
