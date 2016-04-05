@@ -83,7 +83,7 @@ public class SocketSheepExample2Server {
 
       private void sendImageProtocolToClients() {
          String newImage = updateImageProtocol();
-         System.out.println(newImage);
+//         System.out.println(newImage);
 //         System.out.println("---");
          synchronized(clientPrintWriters){
             clientPrintWriters.stream().forEach((printWriter)->{
@@ -107,10 +107,8 @@ public class SocketSheepExample2Server {
             if (name == null || name.isEmpty()) {
                valid = false;
             }
-            synchronized (name) {
-               if (sheep.containsKey(name)) {
-                  valid = false;
-               }
+            if (sheep.containsKey(name)) {
+               valid = false;
             }
          }
          sheep.put(name, new Coordinates());

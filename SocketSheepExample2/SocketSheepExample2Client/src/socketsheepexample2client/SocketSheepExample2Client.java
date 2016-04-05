@@ -14,6 +14,8 @@ import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.border.LineBorder;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -114,6 +116,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    @Override
    public void run(){
       try {
+         Thread.sleep(1000);
+         
          Socket socket = new Socket("::1", PORT);
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
          pw = new PrintWriter(socket.getOutputStream(), true);
@@ -137,7 +141,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
                randomMovement();
             }
          }
-      } catch (IOException | NumberFormatException ex) {
+      } catch (IOException | NumberFormatException | InterruptedException ex) {
          System.err.println(ex.getMessage());
       }
    }
@@ -148,27 +152,40 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       String[] mcNames      = new String[movedClients.length];
       int[] mcCoordinates   = new int[movedClients.length*2];
       
+      int thisClientIndex  = -1;
       for(int i=0;i<movedClients.length;i++){
          String[] split = movedClients[i].split(":");
          mcNames[i]             = split[0];
          mcCoordinates[(i*2)]   = Integer.parseInt(split[1]);
          mcCoordinates[(i*2)+1] = Integer.parseInt(split[2]);
          
-         checkLatency(mcNames, i, mcCoordinates);
+//         checkLatency(mcNames, i, mcCoordinates, input);
+         if(mcNames[i].equals(clientName)){
+            thisClientIndex = i;
+         }
       }
-
-      myPanel.updateCoordinates(mcNames, mcCoordinates);
+      if(thisClientIndex!=-1)
+         thisClientMoved(mcNames, thisClientIndex, mcCoordinates, input);
    }
 
-   private void checkLatency(String[] mcNames, int i, int[] mcCoordinates) {
-      int newXCoor = mcCoordinates[(i*2)];
-      int newYCoor = mcCoordinates[(i*2)+1];
-      
-      if(mcNames[i].equals(clientName)){
-         if(newXCoor != xCoor || newYCoor != yCoor){
-            System.out.println("Latency of " + clientName + ": "+(System.currentTimeMillis()-start)+"ms");
-            start = 0;
+   private void thisClientMoved(String[] mcNames, int i, int[] mcCoordinates, String input) {
+      try{
+         int newXCoor = mcCoordinates[(i*2)];
+         int newYCoor = mcCoordinates[(i*2)+1];
+         boolean moved;
+
+         if (newXCoor != xCoor || newYCoor != yCoor) {
+            xCoor = newXCoor;
+            yCoor = newYCoor;
+            moved = true;
+         }else{
+            moved = false;
          }
+         myPanel.updateCoordinates(mcNames, mcCoordinates, start, moved);
+         start = 0;
+      } catch(ArrayIndexOutOfBoundsException e){
+         System.out.println(e.getMessage());
+         System.out.println("");
       }
    }
 
@@ -221,7 +238,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    }
    
    private static void multiClient(boolean randomMovements, int SHEEP_LIMIT) throws IOException {
-      SocketSheepExample2Client sheep = new SocketSheepExample2Client(randomMovements, "Client Start");
+      SocketSheepExample2Client sheep = new SocketSheepExample2Client(randomMovements, "First");
       sheep.setVisible(true);
       new Thread(sheep).start();
       for (int i = 0; i<SHEEP_LIMIT; i++) {
