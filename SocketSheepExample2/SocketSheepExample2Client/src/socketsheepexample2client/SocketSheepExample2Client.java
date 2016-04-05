@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Random;
 import javax.swing.border.LineBorder;
 import javax.swing.JButton;
@@ -303,6 +302,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    
    public static void main(String[] args) throws IOException {
 //      singleClient();
-      multiClient(20);
+      multiClient(10);
    }
 }

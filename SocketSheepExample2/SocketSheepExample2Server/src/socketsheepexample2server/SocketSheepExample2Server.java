@@ -7,18 +7,18 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class SocketSheepExample2Server {
    private final static int PORT = 4096;
    private static ConcurrentHashMap<String, Coordinates> allSheep;
-   private static ArrayList<PrintWriter> clientPrintWriters;
+   private static ConcurrentArrayList<PrintWriter> allPrintWriters;
 
    public static void main(String[] args) {
       try {
-         allSheep = new ConcurrentHashMap<>();
-         clientPrintWriters = new ArrayList<>();
+         allSheep        = new ConcurrentHashMap<>();
+         allPrintWriters = new ConcurrentArrayList<>();
 
          ServerSocket serverSocket = new ServerSocket(PORT);
          System.out.println("Server started!");
@@ -50,9 +50,9 @@ public class SocketSheepExample2Server {
             bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             printWriter = new PrintWriter(socket.getOutputStream(), true);
             
-            synchronized(clientPrintWriters){
-               clientPrintWriters.add(printWriter);
-            }
+//            synchronized(allPrintWriters){
+               allPrintWriters.add(printWriter);
+//            }
 
             clientName = getValidClientName(bufferedReader, printWriter);
 
@@ -65,10 +65,10 @@ public class SocketSheepExample2Server {
             }
          } catch (IOException ex) {
             System.err.println(ex.getMessage());
-            synchronized(clientPrintWriters){
+//            synchronized(allPrintWriters){
                removeSheep(clientName);
-            }
-            clientPrintWriters.remove(printWriter);
+//            }
+            allPrintWriters.remove(printWriter);
          }
       }
 
@@ -97,11 +97,16 @@ public class SocketSheepExample2Server {
       }
       
       private void sendToAllClients(String protocol){
-         synchronized(clientPrintWriters){
-            clientPrintWriters.forEach((pw)->{
+//         synchronized(allPrintWriters){
+//            allPrintWriters.forEach((pw)->{
+//               pw.println(protocol);
+//            });
+            Iterator<PrintWriter> pwIterator = allPrintWriters.iterator();
+            while(pwIterator.hasNext()){
+               PrintWriter pw = pwIterator.next();
                pw.println(protocol);
-            });
-         }
+            }
+//         }
       }
          
       /**
