@@ -12,12 +12,12 @@ import java.util.concurrent.ConcurrentHashMap;
 
 public class SocketSheepExample2Server {
    private final static int PORT = 4096;
-   private static ConcurrentHashMap<String, Coordinates> sheep;
+   private static ConcurrentHashMap<String, Coordinates> allSheep;
    private static ArrayList<PrintWriter> clientPrintWriters;
 
    public static void main(String[] args) {
       try {
-         sheep = new ConcurrentHashMap<>();
+         allSheep = new ConcurrentHashMap<>();
          clientPrintWriters = new ArrayList<>();
 
          ServerSocket serverSocket = new ServerSocket(PORT);
@@ -35,8 +35,8 @@ public class SocketSheepExample2Server {
    private static class Handler implements Runnable {
       private final Socket socket;
 
-      private BufferedReader input;
-      private PrintWriter pw;
+      private BufferedReader bufferedReader;
+      private PrintWriter printWriter;
 
       private String clientName;
 
@@ -47,19 +47,20 @@ public class SocketSheepExample2Server {
       @Override
       public void run() {
          try {
-            input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            pw = new PrintWriter(socket.getOutputStream(), true);
+            bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            printWriter = new PrintWriter(socket.getOutputStream(), true);
             
             synchronized(clientPrintWriters){
-               clientPrintWriters.add(pw);
+               clientPrintWriters.add(printWriter);
             }
 
-            clientName = getValidClientName(input, pw);
+            clientName = getValidClientName(bufferedReader, printWriter);
 
-            pw.println("NAME_ACCEPTED"+sheep.get(clientName).toString());
-
+            sendToAllClients("NEW_USER"+clientName+":"+allSheep.get(clientName).toString());
+            printWriter.println("GET_CURRENT_USERS"+getAllUsers());
+            
             while (true) {
-               String clientInput = input.readLine();
+               String clientInput = bufferedReader.readLine();
                sendUpdatedImageToAllClients(clientInput, clientInput.lastIndexOf(":"));
             }
          } catch (IOException ex) {
@@ -67,7 +68,7 @@ public class SocketSheepExample2Server {
             synchronized(clientPrintWriters){
                removeSheep(clientName);
             }
-            clientPrintWriters.remove(pw);
+            clientPrintWriters.remove(printWriter);
          }
       }
 
@@ -77,26 +78,39 @@ public class SocketSheepExample2Server {
       }
 
       private void removeSheep(String clientName) {
-         sheep.remove(clientName);
-         sendImageProtocolToClients();
+         allSheep.remove(clientName);
+         sendToAllClients("REMOVE_USER"+clientName);
+//         sendImageProtocolToClients();
       }
 
       private void sendImageProtocolToClients() {
          String newImage = updateImageProtocol();
 //         System.out.println(newImage);
 //         System.out.println("---");
+         
+         sendToAllClients(newImage);
+//         synchronized(clientPrintWriters){
+//            clientPrintWriters.stream().forEach((printWriter)->{
+//               printWriter.println(newImage);
+//            });
+//         }
+      }
+      
+      private void sendToAllClients(String protocol){
          synchronized(clientPrintWriters){
-            clientPrintWriters.stream().forEach((printWriter)->{
-               printWriter.println(newImage);
+            clientPrintWriters.forEach((pw)->{
+               pw.println(protocol);
             });
          }
       }
-
+         
+      /**
+      * Request a name from this client.  Keep requesting until
+      * a name is submitted that is not already used.  Note that
+      * checking for the existence of a name and adding the name
+      * must be done while locking the set of names.
+      */
       private String getValidClientName(BufferedReader input, PrintWriter pw) throws IOException {
-         // Request a name from this client.  Keep requesting until
-         // a name is submitted that is not already used.  Note that
-         // checking for the existence of a name and adding the name
-         // must be done while locking the set of names.
          boolean valid = false;
          String name = "";
 
@@ -107,35 +121,55 @@ public class SocketSheepExample2Server {
             if (name == null || name.isEmpty()) {
                valid = false;
             }
-            if (sheep.containsKey(name)) {
+            if (allSheep.containsKey(name)) {
                valid = false;
             }
          }
-         sheep.put(name, new Coordinates());
+         allSheep.put(name, new Coordinates());
          return name;
       }
 
       private void updateSheepLocation(String[] clientInput) {
-         String name = clientInput[0];
+         String name      = clientInput[0];
          String direction = clientInput[1];
 
-         sheep.get(name).updateLocation(Constants.valueOf(direction));
+         allSheep.get(name).updateLocation(Constants.valueOf(direction));
+      }
+      
+      private String getAllUsers(){
+         StringBuilder sb = new StringBuilder();
+         
+         allSheep.forEach((k,v)->{
+            sb.append(k);
+            sb.append(":");
+            sb.append(v.getX());
+            sb.append(":");
+            sb.append(v.getY());
+            sb.append(",");
+         });
+         return sb.toString();
       }
 
       private String updateImageProtocol() {
          StringBuilder sb = new StringBuilder();
-         sb.append("IMAGE");
+         Coordinates cCoor = allSheep.get(clientName);
          
-         sheep.forEach((k,v)->{
-            sb.append(k);
-            sb.append(":");
-            
-            sb.append(v.getX());
-            sb.append(":");
-            sb.append(v.getY());
-            
-            sb.append(",");
-         });
+         sb.append("IMAGE");
+         sb.append(clientName);
+         sb.append(":");
+         sb.append(cCoor.getX());
+         sb.append(":");
+         sb.append(cCoor.getY());
+//         sheep.forEach((k,v)->{
+//            sb.append(k);
+//            sb.append(":");
+//            
+//            sb.append(v.getX());
+//            sb.append(":");
+//            sb.append(v.getY());
+//            
+//            sb.append(",");
+//         });
 
          return sb.toString();
       }

@@ -13,35 +13,34 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.border.LineBorder;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
 
 public class SocketSheepExample2Client extends JFrame implements ActionListener, Runnable {
-   private final static int PORT = 4096;
-   private final static String UP = "UP";
-   private final static String DOWN = "DOWN";
-   private final static String LEFT = "LEFT";
+   private final static int PORT     = 4096;
+   private final static String UP    = "UP";
+   private final static String DOWN  = "DOWN";
+   private final static String LEFT  = "LEFT";
    private final static String RIGHT = "RIGHT";
 
-   private final JButton jbUp   = new JButton(UP);
-   private final JButton jbDown = new JButton(DOWN);
-   private final JButton jbLeft = new JButton(LEFT);
+   private final JButton jbUp    = new JButton(UP);
+   private final JButton jbDown  = new JButton(DOWN);
+   private final JButton jbLeft  = new JButton(LEFT);
    private final JButton jbRight = new JButton(RIGHT);
    private final ArrayList<JButton> buttons;
    
    private final Random rand;
    private String clientName;
-   private int xCoor;
-   private int yCoor;
+//   private int xCoor;
+//   private int yCoor;
    
    private final MyPanel myPanel;
    private BufferedReader in;
-   private PrintWriter pw;
+   private PrintWriter printWriter;
    
    private final boolean randomMovements;
    
@@ -120,19 +119,40 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          
          Socket socket = new Socket("::1", PORT);
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-         pw = new PrintWriter(socket.getOutputStream(), true);
+         printWriter = new PrintWriter(socket.getOutputStream(), true);
          
          while (true) {
             String input = in.readLine();
             
             if(input!=null){
                if (input.startsWith("SUBMITNAME")) {
-                  pw.println(getClientName());
-               } else if (input.startsWith("NAME_ACCEPTED")) {
+                  printWriter.println(getClientName());
+               } else if (input.startsWith("NEW_USER")){
+                  String[] sCoor = input.substring(8).split(":");
+                  String cName = sCoor[0];
+                  int cXCoor   = Integer.parseInt(sCoor[1]);
+                  int cYCoor   = Integer.parseInt(sCoor[2]);
+                  
+                  myPanel.addSheep(cName, new int[]{cXCoor, cYCoor});
+                  
                   enableButtons();
-                  String[] sCoordinates = input.substring(13).split(":");
-                  xCoor = Integer.parseInt(sCoordinates[0]);
-                  yCoor = Integer.parseInt(sCoordinates[1]);
+               } else if(input.startsWith("GET_CURRENT_USERS")){
+                  Object[] pDetails = parseClientAndCoordinates(input.substring(17).split(","));
+                  String[] cNames   = (String[])pDetails[0];
+                  int[]    cCoor    = (int[])pDetails[1];
+                  
+                  for(int i=0;i<cNames.length;i++){
+                     if(cNames[i].equals(clientName)){
+                        continue;
+                     }
+                     
+                     int cXCoor = cCoor[(i*2)];
+                     int cYCoor = cCoor[(i*2)+1];
+                     
+                     myPanel.addSheep(cNames[i], new int[]{cXCoor, cYCoor});
+                  }
+               } else if(input.startsWith("REMOVE_USER")){
+                  myPanel.removeSheep(input.substring(11));
                } else if (input.startsWith("IMAGE")){
                   handleImages(input);
                }
@@ -146,47 +166,81 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       }
    }
    
-   private void handleImages(String input) throws NumberFormatException {
-      String[] movedClients = input.substring(5).split(",");
-
-      String[] mcNames      = new String[movedClients.length];
-      int[] mcCoordinates   = new int[movedClients.length*2];
+   private Object[] parseClientAndCoordinates(String[] movedClients){
+      String[] cNames    = new String[movedClients.length];
+      int[] cCoordinates = new int[movedClients.length*2];
       
-      int thisClientIndex   = -1;
       for(int i=0;i<movedClients.length;i++){
-         String[] split = movedClients[i].split(":");
-         mcNames[i]             = split[0];
-         mcCoordinates[(i*2)]   = Integer.parseInt(split[1]);
-         mcCoordinates[(i*2)+1] = Integer.parseInt(split[2]);
-         
-         if(mcNames[i].equals(clientName)){
-            thisClientIndex = i;
+         String[] split        = movedClients[i].split(":");
+         cNames[i]             = split[0];
+         cCoordinates[(i*2)]   = Integer.parseInt(split[1]);
+         cCoordinates[(i*2)+1] = Integer.parseInt(split[2]);
+      }
+      return new Object[]{cNames, cCoordinates};
+   }
+   
+   private void handleImages(String input) throws NumberFormatException {
+      Object[] protocolDetails = parseClientAndCoordinates(input.substring(5).split(","));
+      String[] cNames          = (String[])protocolDetails[0];
+      
+//      boolean moved   = Arrays.stream(cNames).anyMatch((cn)->cn.equals(clientName));
+      
+      boolean moved   = false;
+      
+      for(String cName : cNames){
+         if(cName.equals(clientName)){
+            moved = true;
+            break;
          }
       }
-      if(thisClientIndex!=-1)
-         thisClientMoved(mcNames, thisClientIndex, mcCoordinates, input);
+      
+      myPanel.updateCoordinates(protocolDetails, moved? start : -1);
+      
+//      String[] movedClients = input.substring(5).split(",");
+//
+//      String[] mcNames    = new String[movedClients.length];
+//      int[] mcCoordinates = new int[movedClients.length*2];
+//      boolean moved       = false;
+//      
+//      for(int i=0;i<movedClients.length;i++){
+//         String[] split = movedClients[i].split(":");
+//         mcNames[i]             = split[0];
+//         mcCoordinates[(i*2)]   = Integer.parseInt(split[1]);
+//         mcCoordinates[(i*2)+1] = Integer.parseInt(split[2]);
+//         
+//         if (mcNames[i].equals(clientName)) {
+//            moved = true;
+//         }
+//      }
+//      myPanel.updateCoordinates(mcNames, mcCoordinates, moved? start : -1);
+//         if(mcNames[i].equals(clientName)){
+//            thisClientIndex = i;
+//         }
+//      if(thisClientIndex!=-1)
+//         thisClientMoved(mcNames, thisClientIndex, mcCoordinates, input);
+      
    }
 
-   private void thisClientMoved(String[] mcNames, int i, int[] mcCoordinates, String input) {
-      try{
-         int newXCoor = mcCoordinates[(i*2)];
-         int newYCoor = mcCoordinates[(i*2)+1];
-         boolean moved;
-
-         if (newXCoor != xCoor || newYCoor != yCoor) {
-            xCoor = newXCoor;
-            yCoor = newYCoor;
-            moved = true && this.isVisible();
-         }else{
-            moved = false;
-         }
-         myPanel.updateCoordinates(mcNames, mcCoordinates, start, moved);
-//         start = 0;
-      } catch(ArrayIndexOutOfBoundsException e){
-         System.out.println(e.getMessage());
-         System.out.println("");
-      }
-   }
+//   private void thisClientMoved(String[] mcNames, int i, int[] mcCoordinates) {
+//      try{
+//         int newXCoor = mcCoordinates[(i*2)];
+//         int newYCoor = mcCoordinates[(i*2)+1];
+//         boolean moved;
+//
+//         if (newXCoor != xCoor || newYCoor != yCoor) {
+//            xCoor = newXCoor;
+//            yCoor = newYCoor;
+//            moved = true && this.isVisible();
+//         }else{
+//            moved = false;
+//         }
+//         myPanel.updateCoordinates(mcNames, mcCoordinates, moved? start : -1);
+////         start = 0;
+//      } catch(ArrayIndexOutOfBoundsException e){
+//         System.out.println(e.getMessage());
+//         System.out.println("");
+//      }
+//   }
 
    /**
     * Prompt for and return the desired screen clientName.
@@ -199,6 +253,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
             JOptionPane.PLAIN_MESSAGE);
       }
       this.setTitle(this.getTitle()+": "+clientName);
+      this.myPanel.setClientName(clientName);
       return clientName;
    }
 
@@ -215,7 +270,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          direction = RIGHT;
       }
       start = System.currentTimeMillis();
-      pw.println(clientName+": "+direction);
+      printWriter.println(clientName+": "+direction);
    }
    
    private void randomMovement(){
@@ -248,6 +303,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    
    public static void main(String[] args) throws IOException {
 //      singleClient();
-      multiClient(10);
+      multiClient(20);
    }
 }
