@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Random;
 import javax.swing.border.LineBorder;
 import javax.swing.JButton;
@@ -114,8 +115,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    @Override
    public void run(){
       try {
-//         Thread.sleep(1000);
-         
          Socket socket = new Socket("::1", PORT);
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
          printWriter = new PrintWriter(socket.getOutputStream(), true);
@@ -182,64 +181,10 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       Object[] protocolDetails = parseClientAndCoordinates(input.substring(5).split(","));
       String[] cNames          = (String[])protocolDetails[0];
       
-//      boolean moved   = Arrays.stream(cNames).anyMatch((cn)->cn.equals(clientName));
-      
-      boolean moved   = false;
-      
-      for(String cName : cNames){
-         if(cName.equals(clientName)){
-            moved = true;
-            break;
-         }
-      }
+      boolean moved   = Arrays.stream(cNames).anyMatch((cn)->cn.equals(clientName));
       
       myPanel.updateCoordinates(protocolDetails, moved? start : -1);
-      
-//      String[] movedClients = input.substring(5).split(",");
-//
-//      String[] mcNames    = new String[movedClients.length];
-//      int[] mcCoordinates = new int[movedClients.length*2];
-//      boolean moved       = false;
-//      
-//      for(int i=0;i<movedClients.length;i++){
-//         String[] split = movedClients[i].split(":");
-//         mcNames[i]             = split[0];
-//         mcCoordinates[(i*2)]   = Integer.parseInt(split[1]);
-//         mcCoordinates[(i*2)+1] = Integer.parseInt(split[2]);
-//         
-//         if (mcNames[i].equals(clientName)) {
-//            moved = true;
-//         }
-//      }
-//      myPanel.updateCoordinates(mcNames, mcCoordinates, moved? start : -1);
-//         if(mcNames[i].equals(clientName)){
-//            thisClientIndex = i;
-//         }
-//      if(thisClientIndex!=-1)
-//         thisClientMoved(mcNames, thisClientIndex, mcCoordinates, input);
-      
    }
-
-//   private void thisClientMoved(String[] mcNames, int i, int[] mcCoordinates) {
-//      try{
-//         int newXCoor = mcCoordinates[(i*2)];
-//         int newYCoor = mcCoordinates[(i*2)+1];
-//         boolean moved;
-//
-//         if (newXCoor != xCoor || newYCoor != yCoor) {
-//            xCoor = newXCoor;
-//            yCoor = newYCoor;
-//            moved = true && this.isVisible();
-//         }else{
-//            moved = false;
-//         }
-//         myPanel.updateCoordinates(mcNames, mcCoordinates, moved? start : -1);
-////         start = 0;
-//      } catch(ArrayIndexOutOfBoundsException e){
-//         System.out.println(e.getMessage());
-//         System.out.println("");
-//      }
-//   }
 
    /**
     * Prompt for and return the desired screen clientName.
@@ -256,6 +201,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       return clientName;
    }
 
+   //<editor-fold defaultstate="collapsed" desc="Movement and set StartTime">
    @Override
    public void actionPerformed(ActionEvent e) {
       String direction = "";
@@ -275,7 +221,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private void randomMovement(){
       buttons.get(rand.nextInt(buttons.size())).doClick();
    }
-
+   
    private void enableButtons() {
       buttons.stream().forEach((JButton button)->{
          button.setEnabled(true);
@@ -283,7 +229,9 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       jbUp.doClick();
       jbDown.doClick();
    }
+//</editor-fold>
    
+   //<editor-fold defaultstate="collapsed" desc="Single or Multi client">
    public static void singleClient() throws IOException{
       SocketSheepExample2Client sheep = new SocketSheepExample2Client(false);
       sheep.setVisible(true);
@@ -299,9 +247,10 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          new Thread(new SocketSheepExample2Client(true, "Client "+i)).start();
       }
    }
+//</editor-fold>
    
    public static void main(String[] args) throws IOException {
 //      singleClient();
-      multiClient(10);
+      multiClient(5);
    }
 }

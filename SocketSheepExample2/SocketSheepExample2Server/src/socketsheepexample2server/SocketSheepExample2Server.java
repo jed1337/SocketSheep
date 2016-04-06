@@ -48,11 +48,9 @@ public class SocketSheepExample2Server {
       public void run() {
          try {
             bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            printWriter = new PrintWriter(socket.getOutputStream(), true);
+            printWriter    = new PrintWriter(socket.getOutputStream(), true);
             
-//            synchronized(allPrintWriters){
-               allPrintWriters.add(printWriter);
-//            }
+            allPrintWriters.add(printWriter);
 
             clientName = getValidClientName(bufferedReader, printWriter);
 
@@ -65,9 +63,7 @@ public class SocketSheepExample2Server {
             }
          } catch (IOException ex) {
             System.err.println(ex.getMessage());
-//            synchronized(allPrintWriters){
-               removeSheep(clientName);
-//            }
+            removeSheep(clientName);
             allPrintWriters.remove(printWriter);
          }
       }
@@ -80,20 +76,11 @@ public class SocketSheepExample2Server {
       private void removeSheep(String clientName) {
          allSheep.remove(clientName);
          sendToAllClients("REMOVE_USER"+clientName);
-//         sendImageProtocolToClients();
       }
 
       private void sendImageProtocolToClients() {
          String newImage = updateImageProtocol();
-//         System.out.println(newImage);
-//         System.out.println("---");
-         
          sendToAllClients(newImage);
-//         synchronized(clientPrintWriters){
-//            clientPrintWriters.stream().forEach((printWriter)->{
-//               printWriter.println(newImage);
-//            });
-//         }
       }
       
       private void sendToAllClients(String protocol){
@@ -101,12 +88,15 @@ public class SocketSheepExample2Server {
 //            allPrintWriters.forEach((pw)->{
 //               pw.println(protocol);
 //            });
+//          }
+         
+         synchronized(allPrintWriters){
             Iterator<PrintWriter> pwIterator = allPrintWriters.iterator();
             while(pwIterator.hasNext()){
                PrintWriter pw = pwIterator.next();
                pw.println(protocol);
             }
-//         }
+         }
       }
          
       /**
@@ -134,50 +124,42 @@ public class SocketSheepExample2Server {
          return name;
       }
 
-      private void updateSheepLocation(String[] clientInput) {
-         String name      = clientInput[0];
-         String direction = clientInput[1];
-
-         allSheep.get(name).updateLocation(Constants.valueOf(direction));
-      }
-      
       private String getAllUsers(){
          StringBuilder sb = new StringBuilder();
          
          allSheep.forEach((k,v)->{
-            sb.append(k);
-            sb.append(":");
-            sb.append(v.getX());
-            sb.append(":");
-            sb.append(v.getY());
+            updateImageProtocol(sb, k, v);
             sb.append(",");
          });
          return sb.toString();
       }
 
+//<editor-fold defaultstate="collapsed" desc="Updaters">
+      private void updateSheepLocation(String[] clientInput) {
+         String name      = clientInput[0];
+         String direction = clientInput[1];
+         
+         allSheep.get(name).updateLocation(Constants.valueOf(direction));
+      }
+      
       private String updateImageProtocol() {
-         StringBuilder sb = new StringBuilder();
+         StringBuilder sb  = new StringBuilder();
          Coordinates cCoor = allSheep.get(clientName);
          
          sb.append("IMAGE");
-         sb.append(clientName);
-         sb.append(":");
-         sb.append(cCoor.getX());
-         sb.append(":");
-         sb.append(cCoor.getY());
-//         sheep.forEach((k,v)->{
-//            sb.append(k);
-//            sb.append(":");
-//            
-//            sb.append(v.getX());
-//            sb.append(":");
-//            sb.append(v.getY());
-//            
-//            sb.append(",");
-//         });
-
+         updateImageProtocol(sb, clientName, cCoor);
+         
          return sb.toString();
       }
+      
+      private void updateImageProtocol(StringBuilder sb, String key, Coordinates value){
+         sb.append(key);
+         sb.append(":");
+         sb.append(value.getX());
+         sb.append(":");
+         sb.append(value.getY());
+      }
+//</editor-fold>
 
       private void close(Closeable c) {
          try {
