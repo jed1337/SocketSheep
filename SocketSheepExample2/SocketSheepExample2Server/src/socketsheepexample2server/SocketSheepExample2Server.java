@@ -7,10 +7,13 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.Semaphore;
+import java.util.function.Consumer;
 
 public class SocketSheepExample2Server {
    private final static int PORT = 4096;
@@ -24,33 +27,103 @@ public class SocketSheepExample2Server {
 
          ServerSocket serverSocket = new ServerSocket(PORT);
          System.out.println("Server started!");
+         
+         MovementDelegate movementDelegate = new MovementDelegate(100);
+         new Thread(movementDelegate).start();
 
-         while (true) {
-            new Thread(new Handler(serverSocket.accept())).start();
-            System.out.println("Client accepted");
+         for(int i=1 ;; i++){
+            new Thread(new ClientHandler(serverSocket.accept(), movementDelegate)).start();
+            System.out.println("Client " + i + " accepted");
          }
       } catch (IOException ex) {
          System.err.println(ex.getMessage());
       }
    }
+   
+   private static class MovementDelegate implements Runnable{
+      private String message;
+      
+      private final char COMMA = ',';
+//      private final Semaphore LOCK;
+//      private final Semaphore CAN_SEND_LOCK;
+      
+      private final long SEND_INTERVAL;
+      
+      public MovementDelegate(long sendInterval){
+         this.message       = "";
+         this.SEND_INTERVAL = sendInterval;
+         
+//         this.LOCK          = new Semaphore(1);
+//         this.CAN_SEND_LOCK = new Semaphore(0);
+      }
+      
+      public synchronized void addToMessage(String name, Coordinates coor){
+         addToMessage(name, coor.getX(), coor.getY());
+      }
+      
+      public synchronized void addToMessage(String name, int x, int y){
+//         try {
+//            LOCK.acquire();
+               if(message.isEmpty()){
+                  message="IMAGE";
+               }
 
-   private static class Handler implements Runnable {
-      private final Socket socket;
+               message += String.format("%s:%d:%d%c", name, x, y, COMMA);
+//            LOCK.release();
+//         } catch (InterruptedException ex) {
+//            printError(ex);
+//         }
+      }
+      
+      @Override
+      public void run(){
+         while(true){
+            try {
+//               LOCK.acquire();
+                  Thread.sleep(this.SEND_INTERVAL);
+                  
+                  if(message.isEmpty()){
+//                     LOCK.release();
+                     continue;
+                  }
+
+                  allPrintWriters.forEach((pw)->{
+                     pw.println(message);
+                  });
+
+                  message = "";
+               
+//               LOCK.release();
+            } catch (InterruptedException ex) {
+               printError(ex);
+            }
+         }
+      }
+      private static void printError(InterruptedException ex) {
+         System.err.println(ex.getMessage());
+         System.err.println(Arrays.toString(ex.getStackTrace()));
+      }
+   }
+
+   private static class ClientHandler implements Runnable {
+      private final Socket SOCKET;
+      private final MovementDelegate MOVEMENT_DELEGATE;
 
       private BufferedReader bufferedReader;
       private PrintWriter printWriter;
 
       private String clientName;
 
-      public Handler(Socket socket) {
-         this.socket = socket;
+      public ClientHandler(Socket socket, MovementDelegate movementDelegate) {
+         this.SOCKET = socket;
+         this.MOVEMENT_DELEGATE = movementDelegate;
       }
 
       @Override
       public void run() {
          try {
-            bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            printWriter    = new PrintWriter(socket.getOutputStream(), true);
+            bufferedReader = new BufferedReader(new InputStreamReader(SOCKET.getInputStream()));
+            printWriter    = new PrintWriter(SOCKET.getOutputStream(), true);
             
             allPrintWriters.add(printWriter);
 
@@ -60,38 +133,35 @@ public class SocketSheepExample2Server {
             printWriter.println("GET_CURRENT_USERS"+getAllUsers());
             
             while (true) {
-               String clientInput = bufferedReader.readLine();
-               sendUpdatedImageToAllClients(clientInput, clientInput.lastIndexOf(":"));
+               if(bufferedReader.ready()){
+                  String clientInput = bufferedReader.readLine();
+                  sendUpdatedImageToAllClients(clientInput, clientInput.lastIndexOf(":"));
+               }
             }
          } catch (IOException ex) {
             System.err.println(ex.getMessage());
-            removeSheep(clientName);
-            allPrintWriters.remove(printWriter);
+            removeClient();
          }
       }
 
       private void sendUpdatedImageToAllClients(String clientInput, int i) {
          updateSheepLocation(new String[]{clientInput.substring(0, i), clientInput.substring(i + 2)});
-         sendImageProtocolToClients();
+         MOVEMENT_DELEGATE.addToMessage(clientName, allSheep.get(clientName));
       }
 
-      private void removeSheep(String clientName) {
+      private void removeClient() {
          allSheep.remove(clientName);
+         allPrintWriters.remove(printWriter);
+         close(printWriter);
          sendToAllClients("REMOVE_USER"+clientName);
       }
 
-      private void sendImageProtocolToClients() {
-         String newImage = updateImageProtocol();
-         sendToAllClients(newImage);
-      }
+//      private void sendImageProtocolToClients() {
+//         String newImage = updateImageProtocol();
+//         sendToAllClients(newImage);
+//      }
       
       private void sendToAllClients(String protocol){
-//         synchronized(allPrintWriters){
-//            allPrintWriters.forEach((pw)->{
-//               pw.println(protocol);
-//            });
-//          }
-         
          synchronized(allPrintWriters){
             Iterator<PrintWriter> pwIterator = allPrintWriters.iterator();
             while(pwIterator.hasNext()){
@@ -144,15 +214,15 @@ public class SocketSheepExample2Server {
          allSheep.get(name).updateLocation(Constants.valueOf(direction));
       }
       
-      private String updateImageProtocol() {
-         StringBuilder sb  = new StringBuilder();
-         Coordinates cCoor = allSheep.get(clientName);
-         
-         sb.append("IMAGE");
-         updateImageProtocol(sb, clientName, cCoor);
-         
-         return sb.toString();
-      }
+//      private String updateImageProtocol() {
+//         StringBuilder sb  = new StringBuilder();
+//         Coordinates cCoor = allSheep.get(clientName);
+//         
+//         sb.append("IMAGE");
+//         updateImageProtocol(sb, clientName, cCoor);
+//         
+//         return sb.toString();
+//      }
       
       private void updateImageProtocol(StringBuilder sb, String key, Coordinates value){
          sb.append(key);

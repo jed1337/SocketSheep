@@ -27,38 +27,36 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private final static String LEFT  = "LEFT";
    private final static String RIGHT = "RIGHT";
 
-   private final JButton jbUp    = new JButton(UP);
-   private final JButton jbDown  = new JButton(DOWN);
-   private final JButton jbLeft  = new JButton(LEFT);
-   private final JButton jbRight = new JButton(RIGHT);
-   private final ArrayList<JButton> buttons;
+   private final JButton JB_UP    = new JButton(UP);
+   private final JButton JB_DOWN  = new JButton(DOWN);
+   private final JButton JB_LEFT  = new JButton(LEFT);
+   private final JButton JB_RIGHT = new JButton(RIGHT);
+   private final ArrayList<JButton> BUTTONS;
    
-   private final Random rand;
+   private final Random RAND;
    private String clientName;
-//   private int xCoor;
-//   private int yCoor;
    
-   private final MyPanel myPanel;
+   private final MyPanel MY_PANEL;
    private BufferedReader in;
    private PrintWriter printWriter;
    
-   private final boolean randomMovements;
+   private final boolean RANDOM_MOVEMENTS;
    
    private long start;
    
    public SocketSheepExample2Client(boolean randomMovements, String clientName) throws IOException {
       super("SHEEP");
-      this.randomMovements = randomMovements;
-      this.clientName      = clientName;
+      this.RANDOM_MOVEMENTS = randomMovements;
+      this.clientName       = clientName;
 
       String filePath = "src\\images\\Sheep.png";
       if(System.getProperty("os.name").contains("Mac")){
          filePath = filePath.replaceAll("\\\\", "/");
       }
-      myPanel = new MyPanel(filePath);
+      MY_PANEL = new MyPanel(filePath);
 
-      buttons = new ArrayList<>();
-      rand    = new Random();
+      BUTTONS = new ArrayList<>();
+      RAND    = new Random();
 
       setupGUI();
    }
@@ -72,15 +70,15 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private void setupGUI() {
       setLayout(new GridBagLayout());
       GridBagConstraints c = new GridBagConstraints();
-      myPanel.setPreferredSize(new Dimension(800,520));
-      myPanel.setBorder(new LineBorder(Color.black, 1));
+      MY_PANEL.setPreferredSize(new Dimension(800,520));
+      MY_PANEL.setBorder(new LineBorder(Color.black, 1));
       
-      addComponent(c, myPanel, GridBagConstraints.VERTICAL, 0, 0, 1, 3);
+      addComponent(c, MY_PANEL, GridBagConstraints.VERTICAL, 0, 0, 1, 3);
       
-      addButton(c, jbUp, GridBagConstraints.HORIZONTAL, 1, 1, 1, 1);
-      addButton(c, jbDown, GridBagConstraints.HORIZONTAL, 1, 2, 1, 1);
-      addButton(c, jbLeft, GridBagConstraints.VERTICAL, 0, 1, 2, 1);
-      addButton(c, jbRight, GridBagConstraints.VERTICAL, 2, 1, 2, 1);
+      addButton(c, JB_UP, GridBagConstraints.HORIZONTAL, 1, 1, 1, 1);
+      addButton(c, JB_DOWN, GridBagConstraints.HORIZONTAL, 1, 2, 1, 1);
+      addButton(c, JB_LEFT, GridBagConstraints.VERTICAL, 0, 1, 2, 1);
+      addButton(c, JB_RIGHT, GridBagConstraints.VERTICAL, 2, 1, 2, 1);
       
       setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
       setResizable(false);
@@ -108,7 +106,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       
       button.addActionListener(this);
       button.setEnabled(false);
-      buttons.add(button);
+      BUTTONS.add(button);
    }
 //</editor-fold>
 
@@ -120,49 +118,49 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          printWriter = new PrintWriter(socket.getOutputStream(), true);
          
          while (true) {
-             if(in.ready()){
-                String input = in.readLine();
+            if (in.ready()) {
+               String input = in.readLine();
+               
+               if (input != null) {
+                  if (input.startsWith("SUBMITNAME")) {
+                     printWriter.println(getClientName());
+                  } else if (input.startsWith("NEW_USER")) {
+                     String[] sCoor = input.substring(8).split(":");
+                     String cName   = sCoor[0];
+                     int cXCoor     = Integer.parseInt(sCoor[1]);
+                     int cYCoor     = Integer.parseInt(sCoor[2]);
 
-                if(input!=null){
-                   if (input.startsWith("SUBMITNAME")) {
-                      printWriter.println(getClientName());
-                   } else if (input.startsWith("NEW_USER")){
-                      String[] sCoor = input.substring(8).split(":");
-                      String cName = sCoor[0];
-                      int cXCoor   = Integer.parseInt(sCoor[1]);
-                      int cYCoor   = Integer.parseInt(sCoor[2]);
+                     MY_PANEL.addSheep(cName, new int[]{cXCoor, cYCoor});
 
-                      myPanel.addSheep(cName, new int[]{cXCoor, cYCoor});
+                     enableButtons();
+                  } else if (input.startsWith("GET_CURRENT_USERS")) {
+                     Object[] pDetails = parseClientAndCoordinates(input.substring(17).split(","));
+                     String[] cNames = (String[]) pDetails[0];
+                     int[] cCoor = (int[]) pDetails[1];
 
-                      enableButtons();
-                   } else if(input.startsWith("GET_CURRENT_USERS")){
-                      Object[] pDetails = parseClientAndCoordinates(input.substring(17).split(","));
-                      String[] cNames   = (String[])pDetails[0];
-                      int[]    cCoor    = (int[])pDetails[1];
+                     for (int i = 0; i < cNames.length; i++) {
+                        if (cNames[i].equals(clientName)) {
+                           continue;
+                        }
 
-                      for(int i=0;i<cNames.length;i++){
-                         if(cNames[i].equals(clientName)){
-                            continue;
-                         }
+                        int cXCoor = cCoor[(i * 2)];
+                        int cYCoor = cCoor[(i * 2) + 1];
 
-                         int cXCoor = cCoor[(i*2)];
-                         int cYCoor = cCoor[(i*2)+1];
-
-                         myPanel.addSheep(cNames[i], new int[]{cXCoor, cYCoor});
-                      }
-                   } else if(input.startsWith("REMOVE_USER")){
-                      myPanel.removeSheep(input.substring(11));
-                   } else if (input.startsWith("IMAGE")){
-                      handleImages(input);
-                   }
-                }
-                if(randomMovements){
-                   randomMovement();
-                }
+                        MY_PANEL.addSheep(cNames[i], new int[]{cXCoor, cYCoor});
+                     }
+                  } else if (input.startsWith("REMOVE_USER")) {
+                     MY_PANEL.removeSheep(input.substring(11));
+                  } else if (input.startsWith("IMAGE")) {
+                     handleImages(input);
+                  }
+               }
+               if (RANDOM_MOVEMENTS) {
+                  randomMovement();
+               }
              }
          }
       } catch (IOException | NumberFormatException ex) {
-         System.err.println(ex.getMessage());
+         printErrors(ex);
       }
    }
    
@@ -185,7 +183,12 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       
       boolean moved   = Arrays.stream(cNames).anyMatch((cn)->cn.equals(clientName));
       
-      myPanel.updateCoordinates(protocolDetails, moved? start : -1);
+      MY_PANEL.updateCoordinates(protocolDetails, moved? start : -1);
+   }
+   
+   private void printErrors(Exception ex) {
+      System.err.println(ex.getMessage());
+      System.err.println(Arrays.toString(ex.getStackTrace()));
    }
 
    /**
@@ -199,7 +202,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
             JOptionPane.PLAIN_MESSAGE);
       }
       this.setTitle(this.getTitle()+": "+clientName);
-      this.myPanel.setClientName(clientName);
+      this.MY_PANEL.setClientName(clientName);
       return clientName;
    }
 
@@ -207,13 +210,13 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    @Override
    public void actionPerformed(ActionEvent e) {
       String direction = "";
-      if (e.getSource() == jbUp) {
+      if (e.getSource() == JB_UP) {
          direction = UP;
-      } else if (e.getSource() == jbDown) {
+      } else if (e.getSource() == JB_DOWN) {
          direction = DOWN;
-      } else if (e.getSource() == jbLeft) {
+      } else if (e.getSource() == JB_LEFT) {
          direction = LEFT;
-      } else if (e.getSource() == jbRight) {
+      } else if (e.getSource() == JB_RIGHT) {
          direction = RIGHT;
       }
       start = System.currentTimeMillis();
@@ -221,15 +224,15 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    }
    
    private void randomMovement(){
-      buttons.get(rand.nextInt(buttons.size())).doClick();
+      BUTTONS.get(RAND.nextInt(BUTTONS.size())).doClick();
    }
    
    private void enableButtons() {
-      buttons.stream().forEach((JButton button)->{
+      BUTTONS.stream().forEach((JButton button)->{
          button.setEnabled(true);
       });
-      jbUp.doClick();
-      jbDown.doClick();
+      JB_UP.doClick();
+      JB_DOWN.doClick();
    }
 //</editor-fold>
    
@@ -261,4 +264,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
 //      multiClient(20);
       multiClient(20, 1000);
    }
+
+
 }

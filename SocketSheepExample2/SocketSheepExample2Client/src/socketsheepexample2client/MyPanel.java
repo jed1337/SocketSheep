@@ -12,22 +12,16 @@ import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 public class MyPanel extends JPanel{
-   private final BufferedImage sheepImage;
-//   private int[] nCoordinates;
-//   private String[] clientNames;
+   private final BufferedImage SHEEP_IMAGE;
    private String clientName;
    private long startTime;
    
    private HashMap<String, int[]> allSheep;
 
    public MyPanel(String filePath) throws IOException {
-      this.sheepImage = ImageIO.read(new File(filePath));
+      this.SHEEP_IMAGE = ImageIO.read(new File(filePath));
       this.allSheep   = new HashMap<>();
       this.startTime  = -1;
-      
-//      this.nCoordinates   = new int[0];
-//      this.clientNames    = new String[0];
-//      this.clientMoved    = false;
       
       this.setBackground(Color.WHITE);
    }
@@ -53,15 +47,10 @@ public class MyPanel extends JPanel{
    }
    
    public void updateCoordinates(String[] cNames, int[] cCoor, long startTime){
-//      this.clientNames  = clientNames;
-//      this.nCoordinates = clientCoordinates;
-//      this.clientMoved  = clientMoved;
-      
-//      if(clientMoved){
-//         this.startTime = startTime;
-//      }
       for(int i=0; i<cNames.length; i++){
-         checkIfContainsSheep(cNames[i]);
+         if(!checkIfContainsSheep(cNames[i])){
+            continue;
+         }
          int x = cCoor[(i*2)];
          int y = cCoor[(i*2)+1];
          
@@ -79,14 +68,8 @@ public class MyPanel extends JPanel{
    public void paintComponent(Graphics g){
       super.paintComponent(g);
 
-//      try {
-//         Thread.sleep(1000);
-//      } catch (InterruptedException ex) {
-//         System.out.println(ex.getMessage());
-//      }
-      
       allSheep.forEach((k,v)->{
-         g.drawImage(sheepImage, v[0], v[1], null);
+         g.drawImage(SHEEP_IMAGE, v[0], v[1], null);
          g.drawString(k, v[0], v[1]);
       });
       
@@ -98,10 +81,9 @@ public class MyPanel extends JPanel{
    }
       
    //<editor-fold defaultstate="collapsed" desc="Checkers">
-   private void checkIfContainsSheep(String name){
-      if(!allSheep.containsKey(name)){
-         throw new NoSuchElementException("Does not contain the name "+name);
-      }
+   private boolean checkIfContainsSheep(String name){
+//         throw new NoSuchElementException("Does not contain the name "+name);      
+      return allSheep.containsKey(name);
    }
    
    private void checkProtocolLength(Object[] p){
