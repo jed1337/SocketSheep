@@ -8,17 +8,19 @@ import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SocketSheepExample2Server {
    private final static int PORT = 4096;
    private static ConcurrentHashMap<String, Coordinates> allSheep;
-   private static ConcurrentArrayList<PrintWriter> allPrintWriters;
+   private static List<PrintWriter> allPrintWriters;
 
    public static void main(String[] args) {
       try {
          allSheep        = new ConcurrentHashMap<>();
-         allPrintWriters = new ConcurrentArrayList<>();
+         allPrintWriters = new CopyOnWriteArrayList<>();
 
          ServerSocket serverSocket = new ServerSocket(PORT);
          System.out.println("Server started!");

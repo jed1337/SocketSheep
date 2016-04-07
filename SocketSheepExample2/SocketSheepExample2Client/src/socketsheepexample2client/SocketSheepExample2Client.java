@@ -120,44 +120,46 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          printWriter = new PrintWriter(socket.getOutputStream(), true);
          
          while (true) {
-            String input = in.readLine();
-            
-            if(input!=null){
-               if (input.startsWith("SUBMITNAME")) {
-                  printWriter.println(getClientName());
-               } else if (input.startsWith("NEW_USER")){
-                  String[] sCoor = input.substring(8).split(":");
-                  String cName = sCoor[0];
-                  int cXCoor   = Integer.parseInt(sCoor[1]);
-                  int cYCoor   = Integer.parseInt(sCoor[2]);
-                  
-                  myPanel.addSheep(cName, new int[]{cXCoor, cYCoor});
-                  
-                  enableButtons();
-               } else if(input.startsWith("GET_CURRENT_USERS")){
-                  Object[] pDetails = parseClientAndCoordinates(input.substring(17).split(","));
-                  String[] cNames   = (String[])pDetails[0];
-                  int[]    cCoor    = (int[])pDetails[1];
-                  
-                  for(int i=0;i<cNames.length;i++){
-                     if(cNames[i].equals(clientName)){
-                        continue;
-                     }
-                     
-                     int cXCoor = cCoor[(i*2)];
-                     int cYCoor = cCoor[(i*2)+1];
-                     
-                     myPanel.addSheep(cNames[i], new int[]{cXCoor, cYCoor});
-                  }
-               } else if(input.startsWith("REMOVE_USER")){
-                  myPanel.removeSheep(input.substring(11));
-               } else if (input.startsWith("IMAGE")){
-                  handleImages(input);
-               }
-            }
-            if(randomMovements){
-               randomMovement();
-            }
+             if(in.ready()){
+                String input = in.readLine();
+
+                if(input!=null){
+                   if (input.startsWith("SUBMITNAME")) {
+                      printWriter.println(getClientName());
+                   } else if (input.startsWith("NEW_USER")){
+                      String[] sCoor = input.substring(8).split(":");
+                      String cName = sCoor[0];
+                      int cXCoor   = Integer.parseInt(sCoor[1]);
+                      int cYCoor   = Integer.parseInt(sCoor[2]);
+
+                      myPanel.addSheep(cName, new int[]{cXCoor, cYCoor});
+
+                      enableButtons();
+                   } else if(input.startsWith("GET_CURRENT_USERS")){
+                      Object[] pDetails = parseClientAndCoordinates(input.substring(17).split(","));
+                      String[] cNames   = (String[])pDetails[0];
+                      int[]    cCoor    = (int[])pDetails[1];
+
+                      for(int i=0;i<cNames.length;i++){
+                         if(cNames[i].equals(clientName)){
+                            continue;
+                         }
+
+                         int cXCoor = cCoor[(i*2)];
+                         int cYCoor = cCoor[(i*2)+1];
+
+                         myPanel.addSheep(cNames[i], new int[]{cXCoor, cYCoor});
+                      }
+                   } else if(input.startsWith("REMOVE_USER")){
+                      myPanel.removeSheep(input.substring(11));
+                   } else if (input.startsWith("IMAGE")){
+                      handleImages(input);
+                   }
+                }
+                if(randomMovements){
+                   randomMovement();
+                }
+             }
          }
       } catch (IOException | NumberFormatException ex) {
          System.err.println(ex.getMessage());
@@ -238,19 +240,25 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       new Thread(sheep).start();
    }
    
-   private static void multiClient(int SHEEP_LIMIT) throws IOException {
+   private static void multiClient(int SHEEP_LIMIT) throws IOException, InterruptedException {
+       multiClient(SHEEP_LIMIT, 0);
+   }
+   
+   private static void multiClient(int SHEEP_LIMIT, long TIME) throws IOException, InterruptedException{
       SocketSheepExample2Client sheep = new SocketSheepExample2Client(false, "Jed");
       sheep.setVisible(true);
       new Thread(sheep).start();
       
       for (int i = 0; i<SHEEP_LIMIT; i++) {
          new Thread(new SocketSheepExample2Client(true, "Client "+i)).start();
+         Thread.sleep(TIME);
       }
    }
 //</editor-fold>
    
-   public static void main(String[] args) throws IOException {
+   public static void main(String[] args) throws IOException, InterruptedException {
 //      singleClient();
-      multiClient(5);
+//      multiClient(20);
+      multiClient(20, 1000);
    }
 }

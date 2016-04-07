@@ -91,7 +91,7 @@ public class MyPanel extends JPanel{
       });
       
       if(this.startTime>0){
-         System.out.println(String.format("Latency of %s is %d: ", 
+         System.out.println(String.format("Latency of %s is %dms ", 
             this.clientName, (System.currentTimeMillis()-this.startTime)));
          this.startTime   = -1;
       }
@@ -100,7 +100,7 @@ public class MyPanel extends JPanel{
    //<editor-fold defaultstate="collapsed" desc="Checkers">
    private void checkIfContainsSheep(String name){
       if(!allSheep.containsKey(name)){
-         throw new NoSuchElementException();
+         throw new NoSuchElementException("Does not contain the name "+name);
       }
    }
    
