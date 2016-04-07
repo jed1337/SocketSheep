@@ -28,7 +28,7 @@ public class SocketSheepExample2Server {
          ServerSocket serverSocket = new ServerSocket(PORT);
          System.out.println("Server started!");
          
-         MovementDelegate movementDelegate = new MovementDelegate(100);
+         MovementDelegate movementDelegate = new MovementDelegate(50);
          new Thread(movementDelegate).start();
 
          for(int i=1 ;; i++){

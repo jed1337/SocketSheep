@@ -65,50 +65,50 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       this(randomMovements, null);
    }
 
-//<editor-fold defaultstate="collapsed" desc="Gui Things">
+    //<editor-fold defaultstate="collapsed" desc="Gui Things">
    
-   private void setupGUI() {
-      setLayout(new GridBagLayout());
-      GridBagConstraints c = new GridBagConstraints();
-      MY_PANEL.setPreferredSize(new Dimension(800,520));
-      MY_PANEL.setBorder(new LineBorder(Color.black, 1));
-      
-      addComponent(c, MY_PANEL, GridBagConstraints.VERTICAL, 0, 0, 1, 3);
-      
-      addButton(c, JB_UP, GridBagConstraints.HORIZONTAL, 1, 1, 1, 1);
-      addButton(c, JB_DOWN, GridBagConstraints.HORIZONTAL, 1, 2, 1, 1);
-      addButton(c, JB_LEFT, GridBagConstraints.VERTICAL, 0, 1, 2, 1);
-      addButton(c, JB_RIGHT, GridBagConstraints.VERTICAL, 2, 1, 2, 1);
-      
-      setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-      setResizable(false);
-      setPreferredSize(new Dimension(850, 600));
-      pack();
+    private void setupGUI() {
+        setLayout(new GridBagLayout());
+        GridBagConstraints c = new GridBagConstraints();
+        MY_PANEL.setPreferredSize(new Dimension(800,520));
+        MY_PANEL.setBorder(new LineBorder(Color.black, 1));
+
+        addComponent(c, MY_PANEL, GridBagConstraints.VERTICAL, 0, 0, 1, 3);
+
+        addButton(c, JB_UP, GridBagConstraints.HORIZONTAL, 1, 1, 1, 1);
+        addButton(c, JB_DOWN, GridBagConstraints.HORIZONTAL, 1, 2, 1, 1);
+        addButton(c, JB_LEFT, GridBagConstraints.VERTICAL, 0, 1, 2, 1);
+        addButton(c, JB_RIGHT, GridBagConstraints.VERTICAL, 2, 1, 2, 1);
+
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
+        setPreferredSize(new Dimension(850, 600));
+        pack();
 //      setLocationRelativeTo(null);
 //      setVisible(true);
       //System.out.println("");
    }
-   private void addComponent(GridBagConstraints c, Component component,int fill, 
+    private void addComponent(GridBagConstraints c, Component component,int fill, 
                               int x, int y, int height, int width) {
-      c.fill = fill;
-      c.weightx = 0.5;
-      c.gridx = x;
-      c.gridy = y;
-      c.gridheight = height;
-      c.gridwidth = width;
-      
-      add(component, c);
-   }
-   private void addButton(GridBagConstraints c, JButton button,int fill, 
-                              int x, int y, int height, int width) {
-      
-      addComponent(c, button, fill, x, y, height, width);
-      
-      button.addActionListener(this);
-      button.setEnabled(false);
-      BUTTONS.add(button);
-   }
-//</editor-fold>
+        c.fill = fill;
+        c.weightx = 0.5;
+        c.gridx = x;
+        c.gridy = y;
+        c.gridheight = height;
+        c.gridwidth = width;
+
+        add(component, c);
+    }
+    private void addButton(GridBagConstraints c, JButton button,int fill, 
+                               int x, int y, int height, int width) {
+
+        addComponent(c, button, fill, x, y, height, width);
+
+        button.addActionListener(this);
+        button.setEnabled(false);
+        BUTTONS.add(button);
+    }
+    //</editor-fold>
 
    @Override
    public void run(){
@@ -191,9 +191,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       System.err.println(Arrays.toString(ex.getStackTrace()));
    }
 
-   /**
-    * Prompt for and return the desired screen clientName.
-    */
    private String getClientName() {
       if(clientName==null){
          clientName = JOptionPane.showInputDialog(this,
@@ -262,7 +259,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    public static void main(String[] args) throws IOException, InterruptedException {
 //      singleClient();
 //      multiClient(20);
-      multiClient(20, 1000);
+      multiClient(25, 850);
    }
 
 
