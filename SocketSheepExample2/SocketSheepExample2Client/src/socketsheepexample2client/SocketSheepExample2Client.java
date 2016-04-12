@@ -33,10 +33,10 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private final JButton JB_RIGHT = new JButton(RIGHT);
    private final ArrayList<JButton> BUTTONS;
    
-   private final Random RAND;
-   private final int clientNumber;
-   
    private final MyPanel MY_PANEL;
+   
+   private final Random RAND;
+   private final int clientID;
    
    private final boolean RANDOM_MOVEMENTS;
    
@@ -46,10 +46,10 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private final DataOutputStream dOut;
    private final DataInputStream dIn;
    
-   public SocketSheepExample2Client(boolean randomMovements, int clientNumber) throws IOException {
+   public SocketSheepExample2Client(boolean randomMovements, int clientID) throws IOException {
       super("SHEEP");
       this.RANDOM_MOVEMENTS = randomMovements;
-      this.clientNumber     = clientNumber;
+      this.clientID         = clientID;
 
       this.socket = new Socket("::1", PORT);
       this.dIn    = new DataInputStream(socket.getInputStream());
@@ -60,7 +60,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          filePath = filePath.replaceAll("\\\\", "/");
       }
       
-      this.MY_PANEL = new MyPanel(filePath);
+      this.MY_PANEL = new MyPanel(filePath, clientID);
       this.BUTTONS = new ArrayList<>();
       this.RAND    = new Random();
       setupGUI();
@@ -85,9 +85,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       setResizable(false);
       setPreferredSize(new Dimension(850, 600));
       pack();
-//      setLocationRelativeTo(null);
 //      setVisible(true);
-      //System.out.println("");
    }
    private void addComponent(GridBagConstraints c, Component component,int fill, 
                               int x, int y, int height, int width) {
@@ -118,9 +116,14 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          
          while (true) {
             String input = getInput();
-            
+
             if(input.startsWith("SUBMITNAME")){
-               sendOutput(Integer.toString(clientNumber));
+               sendOutput(Integer.toString(clientID));
+            } 
+            else if (input.startsWith("NEW_USER")){
+               enableButtons();
+            } else if (input.startsWith("IMAGE")) {
+               handleImages(input);
             }
             System.out.println("input = " + input);
          }
@@ -197,7 +200,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    
    private void printErrors(Exception ex) {
       System.err.println(ex.getMessage());
-      System.err.println(Arrays.toString(ex.getStackTrace()));
+      Arrays.stream(ex.getStackTrace()).forEach(System.err::println);
    }
 
    private void closeSafely(Closeable c) {
@@ -208,6 +211,33 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       } catch (IOException ex) {
          System.err.println(ex.getMessage());
       }
+   }
+   
+   private int[] parseClientAndCoordinates(String[] movedClients){
+      int[] nProc = new int[movedClients.length*3];
+
+      for(int i=0;i<movedClients.length;i++){
+         String[] split = movedClients[i].split(":");
+         nProc[(i*3)+0] = Integer.parseInt(split[1]); //ID
+         nProc[(i*3)+1] = Integer.parseInt(split[2]); //X
+         nProc[(i*3)+2] = Integer.parseInt(split[2]); //Y
+      }
+      return nProc;
+   }
+   
+   private void handleImages(String input) throws NumberFormatException {
+      int[] procDetails = parseClientAndCoordinates(input.substring(5).split(","));
+
+//      boolean moved   = Arrays.stream(cNames).anyMatch((cn)->cn.equals(clientName));
+      boolean moved = false;
+      for(int i=0;i<procDetails.length;i+=3){
+         if(procDetails[i] == clientID){
+            moved = true;
+            break;
+         }
+      }
+
+      MY_PANEL.updateCoordinates(procDetails, moved? start : -1);
    }
    
 //   //<editor-fold defaultstate="collapsed" desc="Old implementation functions">
@@ -223,7 +253,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
 //      }
 //      return new Object[]{cNames, cCoordinates};
 //   }
-//
 //   private void handleImages(String input) throws NumberFormatException {
 //      Object[] protocolDetails = parseClientAndCoordinates(input.substring(5).split(","));
 //      String[] cNames          = (String[])protocolDetails[0];
@@ -232,6 +261,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
 //
 //      MY_PANEL.updateCoordinates(protocolDetails, moved? start : -1);
 //   }
+
 //
 //
 //   /**

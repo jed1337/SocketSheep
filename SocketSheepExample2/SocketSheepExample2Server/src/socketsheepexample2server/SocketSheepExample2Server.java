@@ -118,6 +118,7 @@ public class SocketSheepExample2Server {
          try {
             sendOutput("SUBMITNAME");
             allSheep.put(Integer.parseInt(getInput()), new Coordinates());
+            sendOutput("NEW_USER");
             
             
 //            String message = "Test";
@@ -125,6 +126,9 @@ public class SocketSheepExample2Server {
 //            
 //            message = "Second";
 //            sendOutput(message);
+            
+            //So that the streams won't get closed prematurely
+            while(true){}
             
          } catch (IOException ex) {
             System.err.println(ex.getMessage());

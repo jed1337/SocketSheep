@@ -7,56 +7,59 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.InputMismatchException;
-import java.util.NoSuchElementException;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 public class MyPanel extends JPanel{
    private final BufferedImage SHEEP_IMAGE;
-   private String clientName;
+   private final int clientID;
+   
    private long startTime;
    
-   private HashMap<String, int[]> allSheep;
+   private final HashMap<Integer, int[]> allSheep;
 
-   public MyPanel(String filePath) throws IOException {
+   public MyPanel(String filePath, int clientID) throws IOException {
       this.SHEEP_IMAGE = ImageIO.read(new File(filePath));
+      this.clientID    = clientID;
+      
       this.allSheep   = new HashMap<>();
       this.startTime  = -1;
       
       this.setBackground(Color.WHITE);
    }
    
-   public void setClientName(String clientName){
-      this.clientName = clientName;
-   }
-   
-   public void addSheep(String name, int[] coordinates){
+   public void addSheep(int clientID, int[] coordinates){
       checkCoordinateLength(coordinates);
-      allSheep.put(name, coordinates);
+      allSheep.put(clientID, coordinates);
    }
    
-   public void removeSheep(String name){
-      checkIfContainsSheep(name);
-      allSheep.remove(name);
+   public void removeSheep(int clientID){
+      checkIfContainsSheep(clientID);
+      allSheep.remove(clientID);
       this.repaint();
    }
 
    public void updateCoordinates(Object[] protocolDetails, long startTime){
       checkProtocolLength(protocolDetails);
-      updateCoordinates((String[])protocolDetails[0], (int[])protocolDetails[1], startTime);
+      updateCoordinates((int[])protocolDetails[1], startTime);
    }
    
-   public void updateCoordinates(String[] cNames, int[] cCoor, long startTime){
-      for(int i=0; i<cNames.length; i++){
-         if(!checkIfContainsSheep(cNames[i])){
-            continue;
-         }
-         int x = cCoor[(i*2)];
-         int y = cCoor[(i*2)+1];
+   public void updateCoordinates(int[] cProc, long startTime){
+      for(int i=0; i<cProc.length; i++){
+         int id = cProc[(i*3)+0];
+         int x  = cProc[(i*3)+1];
+         int y  = cProc[(i*3)+2];
          
-         this.allSheep.put(cNames[i], new int[]{x,y});
+//         if(!checkIfContainsSheep(cNames[i])){
+//            this.allSheep.put(cNames[i], new int[]{x,y});
+//         }
          
-         if(this.clientName.equals(cNames[i])){
+         //What I want to happen:
+         //If the client's not there, he's put there
+         //If he is, his coordinates is simply updated
+         this.allSheep.put(id, new int[]{x,y});
+         
+         if(this.clientID == id){
             this.startTime = startTime;
          }
       }
@@ -68,22 +71,22 @@ public class MyPanel extends JPanel{
    public void paintComponent(Graphics g){
       super.paintComponent(g);
 
-      allSheep.forEach((k,v)->{
+      allSheep.forEach((Integer k,int[] v)->{
          g.drawImage(SHEEP_IMAGE, v[0], v[1], null);
-         g.drawString(k, v[0], v[1]);
+         g.drawString(Integer.toString(k), v[0], v[1]);
       });
       
       if(this.startTime>0){
          System.out.println(String.format("Latency of %s is %dms ", 
-            this.clientName, (System.currentTimeMillis()-this.startTime)));
+            this.clientID, (System.currentTimeMillis()-this.startTime)));
          this.startTime   = -1;
       }
    }
       
    //<editor-fold defaultstate="collapsed" desc="Checkers">
-   private boolean checkIfContainsSheep(String name){
+   private boolean checkIfContainsSheep(int clientID){
 //         throw new NoSuchElementException("Does not contain the name "+name);      
-      return allSheep.containsKey(name);
+      return allSheep.containsKey(clientID);
    }
    
    private void checkProtocolLength(Object[] p){
