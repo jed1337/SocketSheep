@@ -36,20 +36,19 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private final ArrayList<JButton> BUTTONS;
    
    private final Random RAND;
-   private String clientName;
+   private final int clientNumber;
    
    private final MyPanel MY_PANEL;
-   private BufferedReader in;
    private PrintWriter printWriter;
    
    private final boolean RANDOM_MOVEMENTS;
    
    private long start;
    
-   public SocketSheepExample2Client(boolean randomMovements, String clientName) throws IOException {
+   public SocketSheepExample2Client(boolean randomMovements, int clientNumber) throws IOException {
       super("SHEEP");
       this.RANDOM_MOVEMENTS = randomMovements;
-      this.clientName       = clientName;
+      this.clientNumber       = clientNumber;
 
       String filePath = "src\\images\\Sheep.png";
       if(System.getProperty("os.name").contains("Mac")){
@@ -63,10 +62,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       setupGUI();
    }
    
-   public SocketSheepExample2Client(boolean randomMovements) throws IOException {
-      this(randomMovements, null);
-   }
-
 //<editor-fold defaultstate="collapsed" desc="Gui Things">
    
    private void setupGUI() {
@@ -117,28 +112,21 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       try {
          Socket socket = new Socket("::1", PORT);
          
-         in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//         printWriter = new PrintWriter(socket.getOutputStream(), true);
-         
          DataInputStream dIn   = new DataInputStream(socket.getInputStream());
          DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
          
          while (true) {
-            
             short procLength = dIn.readShort();
             System.out.println("procLength = " + procLength);
-            
-//            while (dIn.available() != procLength) {
-//               byte[] bData = new byte[dIn.available()];
-               byte[] bData = new byte[procLength];
-               dIn.read(bData);
 
-               String input = new String(bData, StandardCharsets.UTF_8);
-               System.out.println("input = " + input);
+            byte[] bProcData = new byte[procLength];
+            dIn.read(bProcData);
 
-               dOut.writeBytes("Received");
-               dOut.flush();
-//            }
+            String input = new String(bProcData, StandardCharsets.UTF_8);
+            System.out.println("input = " + input);
+
+            dOut.writeBytes("Received");
+            dOut.flush();
          }
          
 //         while (true) {//<editor-fold defaultstate="collapsed" desc="Old Implementation">
@@ -251,7 +239,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          direction = RIGHT;
       }
       start = System.currentTimeMillis();
-      printWriter.println(clientName+": "+direction);
+      printWriter.println(clientNumber+": "+direction);
    }
    
    private void randomMovement(){
@@ -268,10 +256,10 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
 //</editor-fold>
    
 //<editor-fold defaultstate="collapsed" desc="Single or Multi client">
-   public static void singleClient() throws IOException{
+   public static void singleClient() throws IOException, InterruptedException{
       System.out.println("Started single client");
       
-      SocketSheepExample2Client sheep = new SocketSheepExample2Client(false);
+      SocketSheepExample2Client sheep = new SocketSheepExample2Client(false, -1337);
       sheep.setVisible(true);
       new Thread(sheep).start();
    }
@@ -281,14 +269,12 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    }
    
    private static void multiClient(int SHEEP_LIMIT, long TIME) throws IOException, InterruptedException{
+      singleClient();
+      
       System.out.println("Started multi client");
       
-      SocketSheepExample2Client sheep = new SocketSheepExample2Client(false, "Jed");
-      sheep.setVisible(true);
-      new Thread(sheep).start();
-      
-      for (int i = 0; i<SHEEP_LIMIT; i++) {
-         new Thread(new SocketSheepExample2Client(true, "Client "+i)).start();
+      for (int i = 1; i<=SHEEP_LIMIT; i++) {
+         new Thread(new SocketSheepExample2Client(true, i)).start();
          Thread.sleep(TIME);
       }
    }

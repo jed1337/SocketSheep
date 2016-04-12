@@ -1,27 +1,24 @@
 package socketsheepexample2server;
 
-import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 
 public class SocketSheepExample2Server {
    private final static int PORT = 4096;
-   private static ConcurrentHashMap<String, Coordinates> allSheep;
-   private static List<OutputStream> allOutputStreams;
+   private static ConcurrentHashMap<Integer, Coordinates> allSheep;
+   private static List<DataOutputStream> allDOuts;
 
    public static void main(String[] args) {
       try {
-         allSheep         = new ConcurrentHashMap<>();
-         allOutputStreams = new CopyOnWriteArrayList<>();
+         allSheep = new ConcurrentHashMap<>();
+         allDOuts = new CopyOnWriteArrayList<>();
 
          ServerSocket serverSocket = new ServerSocket(PORT);
          System.out.println("Server started!");
@@ -104,26 +101,18 @@ public class SocketSheepExample2Server {
    
    private static class ClientHandler implements Runnable {
       private final Socket socket;
-
-      private BufferedReader bufferedReader;
-      private final OutputStream os;
-
-      private String clientName;
-
+      private final DataOutputStream dOut;
+      private final DataInputStream dIn;
+      
       public ClientHandler(Socket socket) throws IOException {
          this.socket = socket;
-         this.os = socket.getOutputStream();
+         this.dIn    = new DataInputStream(socket.getInputStream());
+         this.dOut   = new DataOutputStream(socket.getOutputStream());
       }
 
       @Override
       public void run() {
          try {
-//            bufferedReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-//            printWriter    = new PrintWriter(SOCKET.getOutputStream(), true);
-//            os.
-            DataInputStream dIn = new DataInputStream(socket.getInputStream());
-            DataOutputStream dOut = new DataOutputStream(os);
-            
             String message = "Test";
             dOut.writeShort(message.length());
             dOut.writeBytes(message);
@@ -163,6 +152,9 @@ public class SocketSheepExample2Server {
 //            }
 //</editor-fold>
          } catch (IOException ex) {
+            closeSafely(dIn);
+            closeSafely(dOut);
+            closeSafely(socket);
             System.err.println(ex.getMessage());
 //            removeClient();
          }
@@ -239,10 +231,10 @@ public class SocketSheepExample2Server {
 //</editor-fold>
 //<editor-fold defaultstate="collapsed" desc="Updaters">
       private void updateSheepLocation(String[] clientInput) {
-         String name      = clientInput[0];
+         int cNumber      = Integer.parseInt(clientInput[0]);
          String direction = clientInput[1];
          
-         allSheep.get(name).updateLocation(Constants.valueOf(direction));
+         allSheep.get(cNumber).updateLocation(Constants.valueOf(direction));
       }
       
 //      private String updateImageProtocol() {
