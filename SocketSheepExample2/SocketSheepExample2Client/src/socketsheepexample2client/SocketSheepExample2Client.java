@@ -8,17 +8,19 @@ import java.awt.event.ActionListener;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.InputStreamReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 import javax.swing.border.LineBorder;
 import javax.swing.JButton;
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 public class SocketSheepExample2Client extends JFrame implements ActionListener, Runnable {
    private final static int PORT     = 4096;
@@ -114,99 +116,128 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    public void run(){
       try {
          Socket socket = new Socket("::1", PORT);
+         
          in = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-         printWriter = new PrintWriter(socket.getOutputStream(), true);
+//         printWriter = new PrintWriter(socket.getOutputStream(), true);
+         
+         DataInputStream dIn   = new DataInputStream(socket.getInputStream());
+         DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
          
          while (true) {
-            if (in.ready()) {
-               String input = in.readLine();
-               
-               if (input != null) {
-                  if (input.startsWith("SUBMITNAME")) {
-                     printWriter.println(getClientName());
-                  } else if (input.startsWith("NEW_USER")) {
-                     String[] sCoor = input.substring(8).split(":");
-                     String cName   = sCoor[0];
-                     int cXCoor     = Integer.parseInt(sCoor[1]);
-                     int cYCoor     = Integer.parseInt(sCoor[2]);
+            
+            short procLength = dIn.readShort();
+            System.out.println("procLength = " + procLength);
+            
+//            while (dIn.available() != procLength) {
+//               byte[] bData = new byte[dIn.available()];
+               byte[] bData = new byte[procLength];
+               dIn.read(bData);
 
-                     MY_PANEL.addSheep(cName, new int[]{cXCoor, cYCoor});
+               String input = new String(bData, StandardCharsets.UTF_8);
+               System.out.println("input = " + input);
 
-                     enableButtons();
-                  } else if (input.startsWith("GET_CURRENT_USERS")) {
-                     Object[] pDetails = parseClientAndCoordinates(input.substring(17).split(","));
-                     String[] cNames = (String[]) pDetails[0];
-                     int[] cCoor = (int[]) pDetails[1];
-
-                     for (int i = 0; i < cNames.length; i++) {
-                        if (cNames[i].equals(clientName)) {
-                           continue;
-                        }
-
-                        int cXCoor = cCoor[(i * 2)];
-                        int cYCoor = cCoor[(i * 2) + 1];
-
-                        MY_PANEL.addSheep(cNames[i], new int[]{cXCoor, cYCoor});
-                     }
-                  } else if (input.startsWith("REMOVE_USER")) {
-                     MY_PANEL.removeSheep(input.substring(11));
-                  } else if (input.startsWith("IMAGE")) {
-                     handleImages(input);
-                  }
-               }
-               if (RANDOM_MOVEMENTS) {
-                  randomMovement();
-               }
-             }
+               dOut.writeBytes("Received");
+               dOut.flush();
+//            }
          }
+         
+//         while (true) {//<editor-fold defaultstate="collapsed" desc="Old Implementation">
+         
+//
+//            if (in.ready()) {
+//               String input = in.readLine();
+//
+//               if (input != null) {
+//                  if (input.startsWith("SUBMITNAME")) {
+//                     printWriter.println(getClientName());
+//                  } else if (input.startsWith("NEW_USER")) {
+//                     String[] sCoor = input.substring(8).split(":");
+//                     String cName   = sCoor[0];
+//                     int cXCoor     = Integer.parseInt(sCoor[1]);
+//                     int cYCoor     = Integer.parseInt(sCoor[2]);
+//
+//                     MY_PANEL.addSheep(cName, new int[]{cXCoor, cYCoor});
+//
+//                     enableButtons();
+//                  } else if (input.startsWith("GET_CURRENT_USERS")) {
+//                     Object[] pDetails = parseClientAndCoordinates(input.substring(17).split(","));
+//                     String[] cNames = (String[]) pDetails[0];
+//                     int[] cCoor = (int[]) pDetails[1];
+//
+//                     for (int i = 0; i < cNames.length; i++) {
+//                        if (cNames[i].equals(clientName)) {
+//                           continue;
+//                        }
+//
+//                        int cXCoor = cCoor[(i * 2)];
+//                        int cYCoor = cCoor[(i * 2) + 1];
+//
+//                        MY_PANEL.addSheep(cNames[i], new int[]{cXCoor, cYCoor});
+//                     }
+//                  } else if (input.startsWith("REMOVE_USER")) {
+//                     MY_PANEL.removeSheep(input.substring(11));
+//                  } else if (input.startsWith("IMAGE")) {
+//                     handleImages(input);
+//                  }
+//               }
+//               if (RANDOM_MOVEMENTS) {
+//                  randomMovement();
+//               }
+//             }
+//          }
+//</editor-fold>
+
       } catch (IOException | NumberFormatException ex) {
          printErrors(ex);
       }
-   }
-   
-   private Object[] parseClientAndCoordinates(String[] movedClients){
-      String[] cNames    = new String[movedClients.length];
-      int[] cCoordinates = new int[movedClients.length*2];
-      
-      for(int i=0;i<movedClients.length;i++){
-         String[] split        = movedClients[i].split(":");
-         cNames[i]             = split[0];
-         cCoordinates[(i*2)]   = Integer.parseInt(split[1]);
-         cCoordinates[(i*2)+1] = Integer.parseInt(split[2]);
-      }
-      return new Object[]{cNames, cCoordinates};
-   }
-   
-   private void handleImages(String input) throws NumberFormatException {
-      Object[] protocolDetails = parseClientAndCoordinates(input.substring(5).split(","));
-      String[] cNames          = (String[])protocolDetails[0];
-      
-      boolean moved   = Arrays.stream(cNames).anyMatch((cn)->cn.equals(clientName));
-      
-      MY_PANEL.updateCoordinates(protocolDetails, moved? start : -1);
    }
    
    private void printErrors(Exception ex) {
       System.err.println(ex.getMessage());
       System.err.println(Arrays.toString(ex.getStackTrace()));
    }
+   
+//   //<editor-fold defaultstate="collapsed" desc="Old implementation functions">
+//   private Object[] parseClientAndCoordinates(String[] movedClients){
+//      String[] cNames    = new String[movedClients.length];
+//      int[] cCoordinates = new int[movedClients.length*2];
+//
+//      for(int i=0;i<movedClients.length;i++){
+//         String[] split        = movedClients[i].split(":");
+//         cNames[i]             = split[0];
+//         cCoordinates[(i*2)]   = Integer.parseInt(split[1]);
+//         cCoordinates[(i*2)+1] = Integer.parseInt(split[2]);
+//      }
+//      return new Object[]{cNames, cCoordinates};
+//   }
+//
+//   private void handleImages(String input) throws NumberFormatException {
+//      Object[] protocolDetails = parseClientAndCoordinates(input.substring(5).split(","));
+//      String[] cNames          = (String[])protocolDetails[0];
+//
+//      boolean moved   = Arrays.stream(cNames).anyMatch((cn)->cn.equals(clientName));
+//
+//      MY_PANEL.updateCoordinates(protocolDetails, moved? start : -1);
+//   }
+//
+//
+//   /**
+//    * Prompt for and return the desired screen clientName.
+//    */
+//   private String getClientName() {
+//      if(clientName==null){
+//         clientName = JOptionPane.showInputDialog(this,
+//            "Choose a screen name:",
+//            "Screen name selection",
+//            JOptionPane.PLAIN_MESSAGE);
+//      }
+//      this.setTitle(this.getTitle()+": "+clientName);
+//      this.MY_PANEL.setClientName(clientName);
+//      return clientName;
+//   }
+//</editor-fold>
 
-   /**
-    * Prompt for and return the desired screen clientName.
-    */
-   private String getClientName() {
-      if(clientName==null){
-         clientName = JOptionPane.showInputDialog(this,
-            "Choose a screen name:",
-            "Screen name selection",
-            JOptionPane.PLAIN_MESSAGE);
-      }
-      this.setTitle(this.getTitle()+": "+clientName);
-      this.MY_PANEL.setClientName(clientName);
-      return clientName;
-   }
-
-   //<editor-fold defaultstate="collapsed" desc="Movement and set StartTime">
+//<editor-fold defaultstate="collapsed" desc="Movement and set StartTime">
    @Override
    public void actionPerformed(ActionEvent e) {
       String direction = "";
@@ -236,8 +267,10 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    }
 //</editor-fold>
    
-   //<editor-fold defaultstate="collapsed" desc="Single or Multi client">
+//<editor-fold defaultstate="collapsed" desc="Single or Multi client">
    public static void singleClient() throws IOException{
+      System.out.println("Started single client");
+      
       SocketSheepExample2Client sheep = new SocketSheepExample2Client(false);
       sheep.setVisible(true);
       new Thread(sheep).start();
@@ -248,6 +281,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    }
    
    private static void multiClient(int SHEEP_LIMIT, long TIME) throws IOException, InterruptedException{
+      System.out.println("Started multi client");
+      
       SocketSheepExample2Client sheep = new SocketSheepExample2Client(false, "Jed");
       sheep.setVisible(true);
       new Thread(sheep).start();
@@ -260,10 +295,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
 //</editor-fold>
    
    public static void main(String[] args) throws IOException, InterruptedException {
-//      singleClient();
+      singleClient();
 //      multiClient(20);
-      multiClient(20, 1000);
+//      multiClient(20, 1000);
    }
-
-
 }
