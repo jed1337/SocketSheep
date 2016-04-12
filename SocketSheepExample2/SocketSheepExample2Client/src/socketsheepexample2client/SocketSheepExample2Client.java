@@ -121,10 +121,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
             
             if(input.startsWith("SUBMITNAME")){
                sendOutput(Integer.toString(clientNumber));
-//               sendOutput("Mang Kanor");
             }
             System.out.println("input = " + input);
-
          }
          
 //         while (true) {//<editor-fold defaultstate="collapsed" desc="Old Implementation">
@@ -174,10 +172,11 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
 //</editor-fold>
 
       } catch (IOException | NumberFormatException ex) {
+         printErrors(ex);
+      } finally{
          closeSafely(dIn);
          closeSafely(dOut);
          closeSafely(socket);
-         printErrors(ex);
       }
    }
 

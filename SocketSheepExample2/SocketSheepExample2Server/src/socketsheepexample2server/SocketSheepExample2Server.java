@@ -116,10 +116,9 @@ public class SocketSheepExample2Server {
       @Override
       public void run() {
          try {
-            
             sendOutput("SUBMITNAME");
             allSheep.put(Integer.parseInt(getInput()), new Coordinates());
-            System.out.println("");
+            
             
 //            String message = "Test";
 //            sendOutput(message);
@@ -128,11 +127,12 @@ public class SocketSheepExample2Server {
 //            sendOutput(message);
             
          } catch (IOException ex) {
+            System.err.println(ex.getMessage());
+//            removeClient();
+         } finally{
             closeSafely(dIn);
             closeSafely(dOut);
             closeSafely(socket);
-            System.err.println(ex.getMessage());
-//            removeClient();
          }
       }
 
