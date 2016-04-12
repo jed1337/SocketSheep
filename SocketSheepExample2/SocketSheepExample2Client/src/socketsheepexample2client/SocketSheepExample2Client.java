@@ -7,12 +7,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
-import java.io.BufferedReader;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.InputStreamReader;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -39,16 +36,19 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private final int clientNumber;
    
    private final MyPanel MY_PANEL;
-   private PrintWriter printWriter;
    
    private final boolean RANDOM_MOVEMENTS;
    
    private long start;
+
+   private Socket socket;
+   private DataOutputStream dOut;
+   private DataInputStream dIn;
    
    public SocketSheepExample2Client(boolean randomMovements, int clientNumber) throws IOException {
       super("SHEEP");
       this.RANDOM_MOVEMENTS = randomMovements;
-      this.clientNumber       = clientNumber;
+      this.clientNumber     = clientNumber;
 
       String filePath = "src\\images\\Sheep.png";
       if(System.getProperty("os.name").contains("Mac")){
@@ -110,18 +110,20 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    @Override
    public void run(){
       try {
-         Socket socket = new Socket("::1", PORT);
+         socket = new Socket("::1", PORT);
          
-         DataInputStream dIn   = new DataInputStream(socket.getInputStream());
-         DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
+         dIn  = new DataInputStream(socket.getInputStream());
+         dOut = new DataOutputStream(socket.getOutputStream());
          
          while (true) {
-            String input = getData(dIn);
+            String input = getInput();
             
+            if(input.startsWith("SUBMITNAME")){
+               dOut.writeBytes("Received");
+               dOut.flush();
+            }
             System.out.println("input = " + input);
 
-            dOut.writeBytes("Received");
-            dOut.flush();
          }
          
 //         while (true) {//<editor-fold defaultstate="collapsed" desc="Old Implementation">
@@ -175,7 +177,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       }
    }
 
-   private String getData(DataInputStream dIn) throws IOException {
+   
+   private String getInput() throws IOException {
       short procLength = dIn.readShort();
       byte[] bProcData = new byte[procLength];
       dIn.read(bProcData);

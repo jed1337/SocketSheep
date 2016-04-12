@@ -114,10 +114,10 @@ public class SocketSheepExample2Server {
       public void run() {
          try {
             String message = "Test";
-            writeMessage(message);
+            sendOutput(message);
             
             message = "Second";
-            writeMessage(message);
+            sendOutput(message);
             
          } catch (IOException ex) {
             closeSafely(dIn);
@@ -128,7 +128,7 @@ public class SocketSheepExample2Server {
          }
       }
 
-      private void writeMessage(String message) throws IOException {
+      private void sendOutput(String message) throws IOException {
          dOut.writeShort(message.length());
          dOut.writeBytes(message);
          dOut.flush();
