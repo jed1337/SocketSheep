@@ -116,13 +116,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          DataOutputStream dOut = new DataOutputStream(socket.getOutputStream());
          
          while (true) {
-            short procLength = dIn.readShort();
-            System.out.println("procLength = " + procLength);
-
-            byte[] bProcData = new byte[procLength];
-            dIn.read(bProcData);
-
-            String input = new String(bProcData, StandardCharsets.UTF_8);
+            String input = getData(dIn);
+            
             System.out.println("input = " + input);
 
             dOut.writeBytes("Received");
@@ -178,6 +173,14 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       } catch (IOException | NumberFormatException ex) {
          printErrors(ex);
       }
+   }
+
+   private String getData(DataInputStream dIn) throws IOException {
+      short procLength = dIn.readShort();
+      byte[] bProcData = new byte[procLength];
+      dIn.read(bProcData);
+      String input = new String(bProcData, StandardCharsets.UTF_8);
+      return input;
    }
    
    private void printErrors(Exception ex) {

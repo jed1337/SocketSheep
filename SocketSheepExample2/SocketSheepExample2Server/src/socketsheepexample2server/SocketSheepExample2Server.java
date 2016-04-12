@@ -114,43 +114,11 @@ public class SocketSheepExample2Server {
       public void run() {
          try {
             String message = "Test";
-            dOut.writeShort(message.length());
-            dOut.writeBytes(message);
-            dOut.flush();
+            writeMessage(message);
             
             message = "Second";
-            dOut.writeShort(message.length());
-            dOut.writeBytes(message);
-            dOut.flush();
+            writeMessage(message);
             
-//            while (true) {
-//               int available;
-//               while ((available = dIn.available()) != 0) {
-//                  byte[] bData = new byte[dIn.available()];
-//                  dIn.read(bData);
-//                  
-//                  String input = new String(bData, StandardCharsets.UTF_8);
-//                  System.out.println("input = " + input);
-//               }
-//            }
-            
-            
-//  //<editor-fold defaultstate="collapsed" desc="Old code">
-//            allOutputStreams.add(os);
-//
-//            clientName = getValidClientName(bufferedReader, os);
-//
-//            sendToAllClients("NEW_USER"+clientName+":"+allSheep.get(clientName).toString());
-//            os.write(("GET_CURRENT_USERS"+getAllUsers()).getBytes());
-//            os.flush();
-//
-//            while (true) {
-//               if(bufferedReader.ready()){
-//                  String clientInput = bufferedReader.readLine();
-//                  sendUpdatedImageToAllClients(clientInput, clientInput.lastIndexOf(":"));
-//               }
-//            }
-//</editor-fold>
          } catch (IOException ex) {
             closeSafely(dIn);
             closeSafely(dOut);
@@ -158,6 +126,12 @@ public class SocketSheepExample2Server {
             System.err.println(ex.getMessage());
 //            removeClient();
          }
+      }
+
+      private void writeMessage(String message) throws IOException {
+         dOut.writeShort(message.length());
+         dOut.writeBytes(message);
+         dOut.flush();
       }
 
 ////<editor-fold defaultstate="collapsed" desc="Old code">
