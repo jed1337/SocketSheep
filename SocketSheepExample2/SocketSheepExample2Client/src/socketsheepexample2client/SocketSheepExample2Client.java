@@ -122,7 +122,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
             } 
             else if (input.startsWith("NEW_USER")){
                enableButtons();
-            } else if (input.startsWith("IMAGE")) {
+            } 
+            else if (input.startsWith("IMAGE")) {
                handleImages(input);
             }
             System.out.println("input = " + input);
@@ -218,9 +219,11 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
 
       for(int i=0;i<movedClients.length;i++){
          String[] split = movedClients[i].split(":");
-         nProc[(i*3)+0] = Integer.parseInt(split[1]); //ID
-         nProc[(i*3)+1] = Integer.parseInt(split[2]); //X
-         nProc[(i*3)+2] = Integer.parseInt(split[2]); //Y
+         int index      = 0;
+         
+         nProc[(i*3)+index] = Integer.parseInt(split[(index++)]); //ID
+         nProc[(i*3)+index] = Integer.parseInt(split[(index++)]); //X
+         nProc[(i*3)+index] = Integer.parseInt(split[(index++)]); //Y
       }
       return nProc;
    }
@@ -228,7 +231,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private void handleImages(String input) throws NumberFormatException {
       int[] procDetails = parseClientAndCoordinates(input.substring(5).split(","));
 
-//      boolean moved   = Arrays.stream(cNames).anyMatch((cn)->cn.equals(clientName));
       boolean moved = false;
       for(int i=0;i<procDetails.length;i+=3){
          if(procDetails[i] == clientID){

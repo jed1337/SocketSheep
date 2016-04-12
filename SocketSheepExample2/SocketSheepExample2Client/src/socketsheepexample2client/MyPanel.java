@@ -45,7 +45,7 @@ public class MyPanel extends JPanel{
    }
    
    public void updateCoordinates(int[] cProc, long startTime){
-      for(int i=0; i<cProc.length; i++){
+      for(int i=0; i<cProc.length; i+=3){
          int id = cProc[(i*3)+0];
          int x  = cProc[(i*3)+1];
          int y  = cProc[(i*3)+2];

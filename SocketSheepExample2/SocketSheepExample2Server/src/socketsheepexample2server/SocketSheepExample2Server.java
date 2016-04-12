@@ -39,8 +39,8 @@ public class SocketSheepExample2Server {
          System.err.println(ex.getMessage());
       }
    }
-// //<editor-fold defaultstate="collapsed" desc="MovementDelegate">
    
+// //<editor-fold defaultstate="collapsed" desc="MovementDelegate">
 //   private static class MovementDelegate implements Runnable{
 //      private String message;
 //
@@ -119,7 +119,7 @@ public class SocketSheepExample2Server {
             sendOutput("SUBMITNAME");
             allSheep.put(Integer.parseInt(getInput()), new Coordinates());
             sendOutput("NEW_USER");
-            
+            sendOutput("IMAGE-1337:400:450");
             
 //            String message = "Test";
 //            sendOutput(message);
@@ -225,6 +225,7 @@ public class SocketSheepExample2Server {
 //         return sb.toString();
 //      }
 //</editor-fold>
+      
 //<editor-fold defaultstate="collapsed" desc="Updaters">
       private void updateSheepLocation(String[] clientInput) {
          int cNumber      = Integer.parseInt(clientInput[0]);
