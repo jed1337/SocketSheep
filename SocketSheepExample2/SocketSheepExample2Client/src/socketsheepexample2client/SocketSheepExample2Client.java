@@ -7,6 +7,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
@@ -41,24 +42,27 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    
    private long start;
 
-   private Socket socket;
-   private DataOutputStream dOut;
-   private DataInputStream dIn;
+   private final Socket socket;
+   private final DataOutputStream dOut;
+   private final DataInputStream dIn;
    
    public SocketSheepExample2Client(boolean randomMovements, int clientNumber) throws IOException {
       super("SHEEP");
       this.RANDOM_MOVEMENTS = randomMovements;
       this.clientNumber     = clientNumber;
 
+      this.socket = new Socket("::1", PORT);
+      this.dIn    = new DataInputStream(socket.getInputStream());
+      this.dOut   = new DataOutputStream(socket.getOutputStream());
+      
       String filePath = "src\\images\\Sheep.png";
       if(System.getProperty("os.name").contains("Mac")){
          filePath = filePath.replaceAll("\\\\", "/");
       }
-      MY_PANEL = new MyPanel(filePath);
-
-      BUTTONS = new ArrayList<>();
-      RAND    = new Random();
-
+      
+      this.MY_PANEL = new MyPanel(filePath);
+      this.BUTTONS = new ArrayList<>();
+      this.RAND    = new Random();
       setupGUI();
    }
    
@@ -103,6 +107,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       
       button.addActionListener(this);
       button.setEnabled(false);
+
       BUTTONS.add(button);
    }
 //</editor-fold>
@@ -110,17 +115,13 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    @Override
    public void run(){
       try {
-         socket = new Socket("::1", PORT);
-         
-         dIn  = new DataInputStream(socket.getInputStream());
-         dOut = new DataOutputStream(socket.getOutputStream());
          
          while (true) {
             String input = getInput();
             
             if(input.startsWith("SUBMITNAME")){
-               dOut.writeBytes("Received");
-               dOut.flush();
+               sendOutput(Integer.toString(clientNumber));
+//               sendOutput("Mang Kanor");
             }
             System.out.println("input = " + input);
 
@@ -173,15 +174,24 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
 //</editor-fold>
 
       } catch (IOException | NumberFormatException ex) {
+         closeSafely(dIn);
+         closeSafely(dOut);
+         closeSafely(socket);
          printErrors(ex);
       }
    }
 
+   private void sendOutput(String message) throws IOException {
+      dOut.writeShort(message.length());
+      dOut.writeBytes(message);
+      dOut.flush();
+   }
    
    private String getInput() throws IOException {
       short procLength = dIn.readShort();
+      System.out.println("procLength = " + procLength);
       byte[] bProcData = new byte[procLength];
-      dIn.read(bProcData);
+      dIn.readFully(bProcData);
       String input = new String(bProcData, StandardCharsets.UTF_8);
       return input;
    }
@@ -189,6 +199,16 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private void printErrors(Exception ex) {
       System.err.println(ex.getMessage());
       System.err.println(Arrays.toString(ex.getStackTrace()));
+   }
+
+   private void closeSafely(Closeable c) {
+      try {
+         if (c != null) {
+            c.close();
+         }
+      } catch (IOException ex) {
+         System.err.println(ex.getMessage());
+      }
    }
    
 //   //<editor-fold defaultstate="collapsed" desc="Old implementation functions">
@@ -245,7 +265,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          direction = RIGHT;
       }
       start = System.currentTimeMillis();
-      printWriter.println(clientNumber+": "+direction);
+//      printWriter.println(clientNumber+": "+direction);
    }
    
    private void randomMovement(){

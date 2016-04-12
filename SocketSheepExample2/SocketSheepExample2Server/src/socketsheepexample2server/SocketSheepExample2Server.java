@@ -6,6 +6,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -108,16 +109,23 @@ public class SocketSheepExample2Server {
          this.socket = socket;
          this.dIn    = new DataInputStream(socket.getInputStream());
          this.dOut   = new DataOutputStream(socket.getOutputStream());
+         
+         allDOuts.add(dOut);
       }
 
       @Override
       public void run() {
          try {
-            String message = "Test";
-            sendOutput(message);
             
-            message = "Second";
-            sendOutput(message);
+            sendOutput("SUBMITNAME");
+            allSheep.put(Integer.parseInt(getInput()), new Coordinates());
+            System.out.println("");
+            
+//            String message = "Test";
+//            sendOutput(message);
+//            
+//            message = "Second";
+//            sendOutput(message);
             
          } catch (IOException ex) {
             closeSafely(dIn);
@@ -134,6 +142,16 @@ public class SocketSheepExample2Server {
          dOut.flush();
       }
 
+      private String getInput() throws IOException {
+         short procLength = dIn.readShort();
+         System.out.println("procLength = " + procLength);
+         byte[] bProcData = new byte[procLength];
+         dIn.readFully(bProcData);
+         String input = new String(bProcData, StandardCharsets.UTF_8);
+         return input;
+      }
+
+      
 ////<editor-fold defaultstate="collapsed" desc="Old code">
 //      private void sendUpdatedImageToAllClients(String clientInput, int i) {
 //         updateSheepLocation(new String[]{clientInput.substring(0, i), clientInput.substring(i + 2)});
