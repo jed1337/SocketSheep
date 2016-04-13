@@ -16,6 +16,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.border.LineBorder;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -263,23 +265,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
 //
 //      MY_PANEL.updateCoordinates(protocolDetails, moved? start : -1);
 //   }
-
 //
 //
-//   /**
-//    * Prompt for and return the desired screen clientName.
-//    */
-//   private String getClientName() {
-//      if(clientName==null){
-//         clientName = JOptionPane.showInputDialog(this,
-//            "Choose a screen name:",
-//            "Screen name selection",
-//            JOptionPane.PLAIN_MESSAGE);
-//      }
-//      this.setTitle(this.getTitle()+": "+clientName);
-//      this.MY_PANEL.setClientName(clientName);
-//      return clientName;
-//   }
 //</editor-fold>
 
 //<editor-fold defaultstate="collapsed" desc="Movement and set StartTime">
@@ -296,7 +283,12 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          direction = RIGHT;
       }
       start = System.currentTimeMillis();
+      try {
+         sendOutput(clientID+":"+direction);
 //      printWriter.println(clientNumber+": "+direction);
+      } catch (IOException ex) {
+         printErrors(ex);
+      }
    }
    
    private void randomMovement(){

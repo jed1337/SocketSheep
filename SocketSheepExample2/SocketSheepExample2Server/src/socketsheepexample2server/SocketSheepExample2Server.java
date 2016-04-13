@@ -128,7 +128,10 @@ public class SocketSheepExample2Server {
 //            sendOutput(message);
             
             //So that the streams won't get closed prematurely
-            while(true){}
+            while(true){
+               String input = getInput();
+               System.out.println("input = " + input);
+            }
             
          } catch (IOException ex) {
             System.err.println(ex.getMessage());
