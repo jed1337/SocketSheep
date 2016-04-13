@@ -24,15 +24,15 @@ import javax.swing.JFrame;
 
 public class SocketSheepExample2Client extends JFrame implements ActionListener, Runnable {
    private final static int PORT     = 4096;
-   private final static String UP    = "UP";
-   private final static String DOWN  = "DOWN";
-   private final static String LEFT  = "LEFT";
-   private final static String RIGHT = "RIGHT";
+   private final static String UP    = "U";
+   private final static String DOWN  = "D";
+   private final static String LEFT  = "L";
+   private final static String RIGHT = "R";
 
-   private final JButton JB_UP    = new JButton(UP);
-   private final JButton JB_DOWN  = new JButton(DOWN);
-   private final JButton JB_LEFT  = new JButton(LEFT);
-   private final JButton JB_RIGHT = new JButton(RIGHT);
+   private final JButton JB_UP    = new JButton("Up");
+   private final JButton JB_DOWN  = new JButton("Down");
+   private final JButton JB_LEFT  = new JButton("Left");
+   private final JButton JB_RIGHT = new JButton("Right");
    private final ArrayList<JButton> BUTTONS;
    
    private final MyPanel MY_PANEL;
@@ -300,7 +300,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          button.setEnabled(true);
       });
       JB_UP.doClick();
-      JB_DOWN.doClick();
+      JB_UP.doClick();
+//      JB_DOWN.doClick();
    }
 //</editor-fold>
    

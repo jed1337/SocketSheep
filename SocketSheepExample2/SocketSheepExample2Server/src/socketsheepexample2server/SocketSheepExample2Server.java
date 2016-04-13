@@ -8,10 +8,10 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingQueue;
 
 public class SocketSheepExample2Server {
    private final static int PORT = 4096;
@@ -26,11 +26,11 @@ public class SocketSheepExample2Server {
          ServerSocket serverSocket = new ServerSocket(PORT);
          System.out.println("Server started!");
                   
-//         MovementDelegate movementDelegate = new MovementDelegate(100);
-//         new Thread().start();
+         MovementDelegate mDelegate = new MovementDelegate(250);
+         new Thread(mDelegate).start();
 
          for(int i=1 ;; i++){
-            new Thread(new ClientHandler(serverSocket.accept())).start();
+            new Thread(new ClientHandler(serverSocket.accept(), mDelegate)).start();
             System.out.println("Client " + i + " accepted");
          }
       } catch (IOException ex) {
@@ -39,27 +39,16 @@ public class SocketSheepExample2Server {
    }
    
    private static class MovementDelegate implements Runnable{
-      private String message;
-
-      private final char COMMA = ',';
-
       private final long SEND_INTERVAL;
-
+      private final LinkedBlockingQueue<Integer> movedClients;
+      
       public MovementDelegate(long sendInterval){
-         this.message       = "";
          this.SEND_INTERVAL = sendInterval;
+         this.movedClients  = new LinkedBlockingQueue<>();
       }
 
-      public synchronized void addToMessage(String name, Coordinates coor){
-         addToMessage(name, coor.getX(), coor.getY());
-      }
-
-      public synchronized void addToMessage(String name, int x, int y){
-         if(message.isEmpty()) {
-            message = "IMAGE";
-         }
-
-         message += String.format("%s:%d:%d%c", name, x, y, COMMA);
+      public void addToMessage(Integer clientID) throws InterruptedException{
+         this.movedClients.put(clientID);
       }
 
       @Override
@@ -68,23 +57,35 @@ public class SocketSheepExample2Server {
             try {
                Thread.sleep(this.SEND_INTERVAL);
 
-               if (message.isEmpty()) {
+               int size = movedClients.size();
+               
+               if (size == 0) {
                   continue;
                }
+               
+               String message = "IMAGE";
+               
+               while(size > 0){
+                  int cID = this.movedClients.take();
+                  message+= cID+":"+allSheep.get(cID)+",";
+                  size--;
+               }
 
-               allOutputStreams.forEach((os)->{
-                  try {
-                     os.write(message.getBytes());
-                     os.flush();
-                  } catch (IOException ex) {
-                     System.err.println(ex.getMessage());
-                  }
-               });
+//<editor-fold defaultstate="collapsed" desc="Old OutputStream Implementation">
+//               allOutputStreams.forEach((os)->{
+//                  try {
+//                     os.write(message.getBytes());
+//                     os.flush();
+//                  } catch (IOException ex) {
+//                     System.err.println(ex.getMessage());
+//                  }
+//               });
+//</editor-fold>
+               
+               sendOutputAll(message);
 
-               message = "";
-
-            } catch (InterruptedException ex) {
-               printError(ex);
+            } catch (IOException | InterruptedException ex) {
+               printErrors(ex);
             }
          }
       }
@@ -95,19 +96,25 @@ public class SocketSheepExample2Server {
       private final DataOutputStream dOut;
       private final DataInputStream dIn;
       
-      public ClientHandler(Socket socket) throws IOException {
+      private final MovementDelegate mDelegate;
+      
+      private Integer clientID;
+      
+      public ClientHandler(Socket socket, MovementDelegate mDelegate) throws IOException {
          this.socket = socket;
          this.dIn    = new DataInputStream(socket.getInputStream());
          this.dOut   = new DataOutputStream(socket.getOutputStream());
-         
          allDOuts.add(dOut);
+         
+         this.mDelegate = mDelegate;
       }
 
       @Override
       public void run() {
          try {
             sendOutput(dOut, "SUBMITNAME");
-            allSheep.put(Integer.parseInt(getInput()), new Coordinates());
+            this.clientID = Integer.parseInt(getInput());
+            allSheep.put(this.clientID, new Coordinates());
             sendOutput(dOut, "NEW_USER");
             
 //            sendOutput("IMAGE-1337:400:450");
@@ -122,28 +129,17 @@ public class SocketSheepExample2Server {
             while(true){
                String input = getInput();
                System.out.println("input = " + input);
+               updateSheepLocation(input);
+               mDelegate.addToMessage(clientID);
             }
-            
-         } catch (IOException ex) {
-            System.err.println(ex.getMessage());
+         } catch (IOException | InterruptedException ex) {
+            printErrors(ex);
 //            removeClient();
          } finally{
             closeSafely(dIn);
             closeSafely(dOut);
             closeSafely(socket);
          }
-      }
-
-      private void sendOutputAll(String message) throws IOException{
-         for (DataOutputStream dataOut : allDOuts) {
-            sendOutput(dataOut, message);
-         }
-      }
-      
-      private void sendOutput(DataOutputStream dOut, String message) throws IOException {
-         dOut.writeShort(message.length());
-         dOut.writeBytes(message);
-         dOut.flush();
       }
 
       private String getInput() throws IOException {
@@ -153,6 +149,15 @@ public class SocketSheepExample2Server {
          dIn.readFully(bProcData);
          String input = new String(bProcData, StandardCharsets.UTF_8);
          return input;
+      }
+      
+      private void updateSheepLocation(String clientInput) {
+         String[] temp    = clientInput.split(":");
+         int cNumber      = Integer.parseInt(temp[0]);
+         String direction = temp[1];
+         
+         allSheep.get(cNumber).updateLocation(Constants.getDirection(direction));
+         System.out.println("direction = " + direction);
       }
       
 ////<editor-fold defaultstate="collapsed" desc="Old code">
@@ -200,12 +205,6 @@ public class SocketSheepExample2Server {
 //</editor-fold>
       
 //<editor-fold defaultstate="collapsed" desc="Updaters">
-      private void updateSheepLocation(String[] clientInput) {
-         int cNumber      = Integer.parseInt(clientInput[0]);
-         String direction = clientInput[1];
-         
-         allSheep.get(cNumber).updateLocation(Constants.valueOf(direction));
-      }
       
 //      private String updateImageProtocol() {
 //         StringBuilder sb  = new StringBuilder();
@@ -227,6 +226,18 @@ public class SocketSheepExample2Server {
 //</editor-fold>
    }
 
+   private static void sendOutputAll(String message) throws IOException {
+      for(int i=0;i<allDOuts.size();i++){
+         sendOutput(allDOuts.get(i), message);
+      }
+   }
+
+   private static void sendOutput(DataOutputStream dOut, String message) throws IOException {
+      dOut.writeShort(message.length());
+      dOut.writeBytes(message);
+      dOut.flush();
+   }
+   
    private static void printErrors(Exception ex) {
       System.err.println(ex.getMessage());
       Arrays.stream(ex.getStackTrace()).forEach(System.err::println);
