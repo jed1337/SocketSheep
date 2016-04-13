@@ -241,7 +241,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          }
       }
 
-      MY_PANEL.updateCoordinates(procDetails, moved? start : -1);
+      this.MY_PANEL.updateCoordinates(procDetails, moved? start : -1);
    }
    
 //   //<editor-fold defaultstate="collapsed" desc="Old implementation functions">

@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -24,12 +26,8 @@ public class SocketSheepExample2Server {
          ServerSocket serverSocket = new ServerSocket(PORT);
          System.out.println("Server started!");
                   
-//<editor-fold defaultstate="collapsed" desc="Movement delegate">
-//         Timer timer = new Timer();
-//         timer.schedule(movementDelegate, 100);
 //         MovementDelegate movementDelegate = new MovementDelegate(100);
 //         new Thread().start();
-//</editor-fold>
 
          for(int i=1 ;; i++){
             new Thread(new ClientHandler(serverSocket.accept())).start();
@@ -40,65 +38,57 @@ public class SocketSheepExample2Server {
       }
    }
    
-// //<editor-fold defaultstate="collapsed" desc="MovementDelegate">
-//   private static class MovementDelegate implements Runnable{
-//      private String message;
-//
-//      private final char COMMA = ',';
-//
-//      private final long SEND_INTERVAL;
-//
-//      public MovementDelegate(long sendInterval){
-//         this.message       = "";
-//         this.SEND_INTERVAL = sendInterval;
-//
-//      }
-//
-//      public synchronized void addToMessage(String name, Coordinates coor){
-//         addToMessage(name, coor.getX(), coor.getY());
-//      }
-//
-//      public synchronized void addToMessage(String name, int x, int y){
-//         if(message.isEmpty()) {
-//            message = "IMAGE";
-//         }
-//
-//         message += String.format("%s:%d:%d%c", name, x, y, COMMA);
-//      }
-//
-//      @Override
-//      public void run(){
-//         while(true){
-//            try {
-//               Thread.sleep(this.SEND_INTERVAL);
-//
-//               if (message.isEmpty()) {
-//                  continue;
-//               }
-//
-//               allOutputStreams.forEach((os)->{
-//                  try {
-//                     os.write(message.getBytes());
-//                     os.flush();
-//                  } catch (IOException ex) {
-//                     System.err.println(ex.getMessage());
-//                  }
-//               });
-//
-//               message = "";
-//
-//            } catch (InterruptedException ex) {
-//               printError(ex);
-//            }
-//         }
-//      }
-//      private static void printError(InterruptedException ex) {
-//         System.err.println(ex.getMessage());
-//         System.err.println(Arrays.toString(ex.getStackTrace()));
-//      }
-//   }
-//
-//</editor-fold>
+   private static class MovementDelegate implements Runnable{
+      private String message;
+
+      private final char COMMA = ',';
+
+      private final long SEND_INTERVAL;
+
+      public MovementDelegate(long sendInterval){
+         this.message       = "";
+         this.SEND_INTERVAL = sendInterval;
+      }
+
+      public synchronized void addToMessage(String name, Coordinates coor){
+         addToMessage(name, coor.getX(), coor.getY());
+      }
+
+      public synchronized void addToMessage(String name, int x, int y){
+         if(message.isEmpty()) {
+            message = "IMAGE";
+         }
+
+         message += String.format("%s:%d:%d%c", name, x, y, COMMA);
+      }
+
+      @Override
+      public void run(){
+         while(true){
+            try {
+               Thread.sleep(this.SEND_INTERVAL);
+
+               if (message.isEmpty()) {
+                  continue;
+               }
+
+               allOutputStreams.forEach((os)->{
+                  try {
+                     os.write(message.getBytes());
+                     os.flush();
+                  } catch (IOException ex) {
+                     System.err.println(ex.getMessage());
+                  }
+               });
+
+               message = "";
+
+            } catch (InterruptedException ex) {
+               printError(ex);
+            }
+         }
+      }
+   }
    
    private static class ClientHandler implements Runnable {
       private final Socket socket;
@@ -116,18 +106,19 @@ public class SocketSheepExample2Server {
       @Override
       public void run() {
          try {
-            sendOutput("SUBMITNAME");
+            sendOutput(dOut, "SUBMITNAME");
             allSheep.put(Integer.parseInt(getInput()), new Coordinates());
-            sendOutput("NEW_USER");
-            sendOutput("IMAGE-1337:400:450");
+            sendOutput(dOut, "NEW_USER");
             
+//            sendOutput("IMAGE-1337:400:450");
+//<editor-fold defaultstate="collapsed" desc="Tester messages">
 //            String message = "Test";
 //            sendOutput(message);
-//            
+//
 //            message = "Second";
 //            sendOutput(message);
+//</editor-fold>
             
-            //So that the streams won't get closed prematurely
             while(true){
                String input = getInput();
                System.out.println("input = " + input);
@@ -143,7 +134,13 @@ public class SocketSheepExample2Server {
          }
       }
 
-      private void sendOutput(String message) throws IOException {
+      private void sendOutputAll(String message) throws IOException{
+         for (DataOutputStream dataOut : allDOuts) {
+            sendOutput(dataOut, message);
+         }
+      }
+      
+      private void sendOutput(DataOutputStream dOut, String message) throws IOException {
          dOut.writeShort(message.length());
          dOut.writeBytes(message);
          dOut.flush();
@@ -157,7 +154,6 @@ public class SocketSheepExample2Server {
          String input = new String(bProcData, StandardCharsets.UTF_8);
          return input;
       }
-
       
 ////<editor-fold defaultstate="collapsed" desc="Old code">
 //      private void sendUpdatedImageToAllClients(String clientInput, int i) {
@@ -190,32 +186,6 @@ public class SocketSheepExample2Server {
 //               }
 //            }
 //         }
-//      }
-//
-//      /**
-//      * Request a name from this client.  Keep requesting until
-//      * a name is submitted that is not already used.  Note that
-//      * checking for the existence of a name and adding the name
-//      * must be done while locking the set of names.
-//      */
-//      private String getValidClientName(BufferedReader input, OutputStream os) throws IOException {
-//         boolean valid = false;
-//         String name = "";
-//
-//         while (!valid) {
-//            valid = true;
-//            os.write("SUBMITNAME".getBytes());
-//            os.flush();
-//            name = input.readLine();
-//            if (name == null || name.isEmpty()) {
-//               valid = false;
-//            }
-//            if (allSheep.containsKey(name)) {
-//               valid = false;
-//            }
-//         }
-//         allSheep.put(name, new Coordinates());
-//         return name;
 //      }
 //
 //      private String getAllUsers(){
@@ -255,15 +225,20 @@ public class SocketSheepExample2Server {
          sb.append(value.getY());
       }
 //</editor-fold>
+   }
 
-      private void closeSafely(Closeable c) {
-         try {
-            if (c != null) {
-               c.close();
-            }
-         } catch (IOException ex) {
-            System.err.println(ex.getMessage());
+   private static void printErrors(Exception ex) {
+      System.err.println(ex.getMessage());
+      Arrays.stream(ex.getStackTrace()).forEach(System.err::println);
+   }
+
+   private static void closeSafely(Closeable c) {
+      try{
+         if (c != null) {
+            c.close();
          }
+      } catch (IOException ex) {
+         System.err.println(ex.getMessage());
       }
    }
 }
