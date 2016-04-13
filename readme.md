@@ -15,3 +15,24 @@
 
 * http://www.java-samples.com/showtutorial.php?tutorialid=388
 * http://www.tutorialspoint.com/java/java_bytearrayoutputstream.htm
+
+###Scaling
+
+* http://stackoverflow.com/questions/5079172/java-server-multiple-ports 
+* http://codereview.stackexchange.com/questions/38557/concurrent-multi-server-pinging-in-java 
+* http://stackoverflow.com/questions/15721808/connecting-a-client-to-multiple-servers-in-java
+* http://stackoverflow.com/questions/21977263/client-program-that-can-connect-to-multiple-servers-simultaneously 
+
+* http://tutorials.jenkov.com/java-multithreaded-servers/multithreaded-server.html
+* http://www.tutorialspoint.com/javaexamples/net_multisoc.htm
+* http://cs.lmu.edu/~ray/notes/javanetexamples/ 
+
+* http://stackoverflow.com/questions/26145408/multiple-jvms-vs-single-app-server
+* http://www.theserverside.com/discussions/thread.tss?thread_id=20044
+* http://stackoverflow.com/questions/4569159/why-do-we-use-multi-application-server-instances-on-the-same-server 
+
+* http://www.cacheonix.org/presentations/Architecture-for-Scaling-Java-Applications-to-Multiple-Servers.pdf
+* http://www.cacheonix.org/presentations/best_practices_for_scaling_java_applications_with_distributed_caching.pdf
+* http://stackoverflow.com/questions/5401992/what-does-scale-horizontally-and-scale-vertically-mean
+* http://stackoverflow.com/questions/11707879/difference-between-scaling-horizontally-and-vertically-for-databases
+* https://blog.openshift.com/best-practices-for-horizontal-application-scaling/
