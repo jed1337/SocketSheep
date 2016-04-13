@@ -16,8 +16,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.border.LineBorder;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -128,7 +126,10 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
             else if (input.startsWith("IMAGE")) {
                handleImages(input);
             }
-            System.out.println("input = " + input);
+            if(RANDOM_MOVEMENTS){
+               randomMovement();
+            }
+//            System.out.println("input = " + input);
          }
          
 //         while (true) {//<editor-fold defaultstate="collapsed" desc="Old Implementation">
@@ -194,7 +195,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    
    private String getInput() throws IOException {
       short procLength = dIn.readShort();
-      System.out.println("procLength = " + procLength);
+//      System.out.println("procLength = " + procLength);
       byte[] bProcData = new byte[procLength];
       dIn.readFully(bProcData);
       String input = new String(bProcData, StandardCharsets.UTF_8);
@@ -285,7 +286,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       start = System.currentTimeMillis();
       try {
          sendOutput(clientID+":"+direction);
-//      printWriter.println(clientNumber+": "+direction);
       } catch (IOException ex) {
          printErrors(ex);
       }
@@ -331,8 +331,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
 //</editor-fold>
    
    public static void main(String[] args) throws IOException, InterruptedException {
-      singleClient();
-//      multiClient(20);
+//      singleClient();
+      multiClient(99);
 //      multiClient(20, 1000);
    }
 }

@@ -41,6 +41,8 @@ public class SocketSheepExample2Server {
    private static class MovementDelegate implements Runnable{
       private final long SEND_INTERVAL;
       private final LinkedBlockingQueue<Integer> movedClients;
+      private StringBuilder sb;
+      private String message;
       
       public MovementDelegate(long sendInterval){
          this.SEND_INTERVAL = sendInterval;
@@ -61,16 +63,30 @@ public class SocketSheepExample2Server {
                if (size == 0) {
                   continue;
                }
-               
-               String message = "IMAGE";
-               
+
+//<editor-fold defaultstate="collapsed" desc="String">               
+//               message = "IMAGE";
+//               while(size>0){
+//                  int cID = this.movedClients.take();
+//                  message+= cID+":"+allSheep.get(cID)+",";
+//                  size--;
+//               }
+//               sendOutputAll(message);
+//</editor-fold>
+
+////<editor-fold defaultstate="collapsed" desc="StringBuilder">
+               sb = new StringBuilder("IMAGE");
                while(size > 0){
                   int cID = this.movedClients.take();
-                  message+= cID+":"+allSheep.get(cID)+",";
+                  sb.append(cID);
+                  sb.append(":");
+                  sb.append(allSheep.get(cID));
+                  sb.append(",");
                   size--;
                }
+               sendOutputAll(sb.toString());
+//</editor-fold>
 
-               sendOutputAll(message);
 
             } catch (IOException | InterruptedException ex) {
                printErrors(ex);
@@ -105,7 +121,6 @@ public class SocketSheepExample2Server {
             allSheep.put(this.clientID, new Coordinates());
             sendOutput(dOut, "NEW_USER");
             
-//            sendOutput("IMAGE-1337:400:450");
 //<editor-fold defaultstate="collapsed" desc="Tester messages">
 //            String message = "Test";
 //            sendOutput(message);
@@ -116,14 +131,14 @@ public class SocketSheepExample2Server {
             
             while(true){
                String input = getInput();
-               System.out.println("input = " + input);
+//               System.out.println("input = " + input);
                updateSheepLocation(input);
-               mDelegate.addToMessage(clientID);
+               this.mDelegate.addToMessage(clientID);
             }
          } catch (IOException | InterruptedException ex) {
             printErrors(ex);
-//            removeClient();
          } finally{
+            allSheep.remove(clientID);
             closeSafely(dIn);
             closeSafely(dOut);
             closeSafely(socket);
@@ -132,7 +147,7 @@ public class SocketSheepExample2Server {
 
       private String getInput() throws IOException {
          short procLength = dIn.readShort();
-         System.out.println("procLength = " + procLength);
+//         System.out.println("procLength = " + procLength);
          byte[] bProcData = new byte[procLength];
          dIn.readFully(bProcData);
          String input = new String(bProcData, StandardCharsets.UTF_8);
@@ -145,7 +160,7 @@ public class SocketSheepExample2Server {
          String direction = temp[1];
          
          allSheep.get(cNumber).updateLocation(Constants.getDirection(direction));
-         System.out.println("direction = " + direction);
+//         System.out.println("direction = " + direction);
       }
       
 ////<editor-fold defaultstate="collapsed" desc="Old code">
