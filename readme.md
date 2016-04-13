@@ -16,14 +16,19 @@
 * http://www.java-samples.com/showtutorial.php?tutorialid=388
 * http://www.tutorialspoint.com/java/java_bytearrayoutputstream.htm
 
+* http://stackoverflow.com/questions/13115784/sending-a-message-to-all-clients-client-server-communication
+* http://stackoverflow.com/questions/12550712/ive-created-a-java-server-with-sockets-just-how-do-print-to-all-sockets
+
 ###Scaling
 
 * http://stackoverflow.com/questions/5079172/java-server-multiple-ports 
+* http://www.java2s.com/Tutorial/Java/0320__Network/Channelselector.htm
 * http://codereview.stackexchange.com/questions/38557/concurrent-multi-server-pinging-in-java 
 * http://stackoverflow.com/questions/15721808/connecting-a-client-to-multiple-servers-in-java
 * http://stackoverflow.com/questions/21977263/client-program-that-can-connect-to-multiple-servers-simultaneously 
 
 * http://tutorials.jenkov.com/java-multithreaded-servers/multithreaded-server.html
+* http://tutorials.jenkov.com/java-multithreaded-servers/thread-pooled-server.html
 * http://www.tutorialspoint.com/javaexamples/net_multisoc.htm
 * http://cs.lmu.edu/~ray/notes/javanetexamples/ 
 
