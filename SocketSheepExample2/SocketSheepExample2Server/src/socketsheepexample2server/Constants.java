@@ -5,13 +5,13 @@ public enum Constants {
    
    public static Constants getDirection(String direction){
       switch(direction){
-         case "UP":
+         case "U":
             return UP;
-         case "DOWN":
+         case "D":
             return DOWN;
-         case "LEFT":
+         case "L":
             return LEFT;
-         case "RIGHT":
+         case "R":
             return RIGHT;
          default:
             return INVALID;

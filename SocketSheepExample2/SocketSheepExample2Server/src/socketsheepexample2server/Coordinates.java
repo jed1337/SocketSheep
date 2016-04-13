@@ -4,10 +4,9 @@ public class Coordinates {
    private int x;
    private int y;
    
-   private final int move = 50;
+   private final int moveDistance = 50;
    
    public Coordinates(){
-//      this(0,0);
       this(300,300);
    }
 
@@ -27,22 +26,22 @@ public class Coordinates {
    public void updateLocation(Constants direction){
       switch(direction){
          case UP:
-            y-=move;
+            y-=moveDistance;
             break;
          case DOWN:
-            y+=move;
+            y+=moveDistance;
             break;
          case RIGHT:
-            x+=move;
+            x+=moveDistance;
             break;
          case LEFT:
-            x-=move;
+            x-=moveDistance;
             break;
       }
    }
    
    @Override
    public String toString(){
-      return String.format("x: %d, y: %d\n", x, y);
+      return String.format("%d:%d", x, y);
    }
 }
