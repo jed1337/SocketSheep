@@ -58,7 +58,6 @@ public class SocketSheepExample2Server {
                Thread.sleep(this.SEND_INTERVAL);
 
                int size = movedClients.size();
-               
                if (size == 0) {
                   continue;
                }
@@ -71,17 +70,6 @@ public class SocketSheepExample2Server {
                   size--;
                }
 
-//<editor-fold defaultstate="collapsed" desc="Old OutputStream Implementation">
-//               allOutputStreams.forEach((os)->{
-//                  try {
-//                     os.write(message.getBytes());
-//                     os.flush();
-//                  } catch (IOException ex) {
-//                     System.err.println(ex.getMessage());
-//                  }
-//               });
-//</editor-fold>
-               
                sendOutputAll(message);
 
             } catch (IOException | InterruptedException ex) {

@@ -46,21 +46,21 @@ public class MyPanel extends JPanel{
    
    public void updateCoordinates(int[] cProc, long startTime){
       for(int i=0; i<cProc.length; i+=3){
-         int id = cProc[(i*3)+0];
-         int x  = cProc[(i*3)+1];
-         int y  = cProc[(i*3)+2];
+         try{
+            int id = cProc[i+0];
+            int x  = cProc[i+1];
+            int y  = cProc[i+2];
          
-//         if(!checkIfContainsSheep(cNames[i])){
-//            this.allSheep.put(cNames[i], new int[]{x,y});
-//         }
-         
-         //What I want to happen:
-         //If the client's not there, he's put there
-         //If he is, his coordinates is simply updated
-         this.allSheep.put(id, new int[]{x,y});
-         
-         if(this.clientID == id){
-            this.startTime = startTime;
+            //What I want to happen:
+            //If the client's not there, he's put there
+            //If he is, his coordinates is simply updated
+            this.allSheep.put(id, new int[]{x,y});
+
+            if(this.clientID == id){
+               this.startTime = startTime;
+            }
+         }catch(ArrayIndexOutOfBoundsException e){
+            System.err.println(e);
          }
       }
       
