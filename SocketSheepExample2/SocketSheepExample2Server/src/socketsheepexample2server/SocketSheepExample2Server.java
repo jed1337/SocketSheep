@@ -24,14 +24,20 @@ public class SocketSheepExample2Server {
          allDOuts = new CopyOnWriteArrayList<>();
 
          ServerSocket serverSocket = new ServerSocket(PORT);
+         ServerSocket serverSocket1 = new ServerSocket(PORT+1);
          System.out.println("Server started!");
                   
          MovementDelegate mDelegate = new MovementDelegate(250);
          new Thread(mDelegate).start();
 
          for(int i=1 ;; i++){
-            new Thread(new ClientHandler(serverSocket.accept(), mDelegate)).start();
-            System.out.println("Client " + i + " accepted");
+            if(i%2==1){
+                new Thread(new ClientHandler(serverSocket.accept(), mDelegate)).start();
+                System.out.println("Client " + i + " accepted in Server Socket 1");
+            } else {
+                new Thread(new ClientHandler(serverSocket1.accept(), mDelegate)).start();
+                System.out.println("Client " + i + " accepted in Server Socket 2");
+            }
          }
       } catch (IOException ex) {
          System.err.println(ex.getMessage());

@@ -41,6 +41,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private final boolean RANDOM_MOVEMENTS;
    
    private long start;
+   private static int num = 1;
 
    private final Socket socket;
    private final DataOutputStream dOut;
@@ -50,8 +51,16 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       super("SHEEP");
       this.RANDOM_MOVEMENTS = randomMovements;
       this.clientID         = clientID;
-
-      this.socket = new Socket("::1", PORT);
+      
+      if(num%2==1){
+        this.socket = new Socket("::1", PORT);
+        System.out.println("PORT 4096 entered : " + num);
+        num++;
+      } else {
+        this.socket = new Socket("::1", PORT+1); 
+        System.out.println("PORT 4097 entered : " + num);
+        num++;
+      }
       this.dIn    = new DataInputStream(socket.getInputStream());
       this.dOut   = new DataOutputStream(socket.getOutputStream());
       
@@ -224,9 +233,13 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          String[] split = movedClients[i].split(":");
          int index      = 0;
          
-         nProc[(i*3)+index] = Integer.parseInt(split[(index++)]); //ID
-         nProc[(i*3)+index] = Integer.parseInt(split[(index++)]); //X
-         nProc[(i*3)+index] = Integer.parseInt(split[(index++)]); //Y
+          try {
+              nProc[(i * 3) + index] = Integer.parseInt(split[(index++)]); //ID
+              nProc[(i * 3) + index] = Integer.parseInt(split[(index++)]); //X
+              nProc[(i * 3) + index] = Integer.parseInt(split[(index++)]); //Y
+          } catch (NumberFormatException numberFormatException) {
+              printErrors(numberFormatException);
+          }
       }
       return nProc;
    }
@@ -332,7 +345,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    
    public static void main(String[] args) throws IOException, InterruptedException {
 //      singleClient();
-      multiClient(99);
+      multiClient(5);
 //      multiClient(20, 1000);
    }
 }
