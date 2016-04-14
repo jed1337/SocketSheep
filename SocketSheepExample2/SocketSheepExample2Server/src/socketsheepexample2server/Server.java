@@ -7,7 +7,6 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
@@ -92,7 +91,7 @@ public class Server implements Runnable{
                this.mDelegate.addToMessage(clientID+":"+serverSheep.get(clientID));
             }
          } catch (IOException | InterruptedException ex) {
-            printErrors(ex);
+            PrintErrors.log(ex);
          } finally{
             serverSheep.remove(clientID);
             closeSafely(dIn);
@@ -132,11 +131,6 @@ public class Server implements Runnable{
       dOut.flush();
    }
    
-   private void printErrors(Exception ex) {
-      System.err.println(ex.getMessage());
-      Arrays.stream(ex.getStackTrace()).forEach(System.err::println);
-   }
-
    private void closeSafely(Closeable c) {
       try{
          if (c != null) {

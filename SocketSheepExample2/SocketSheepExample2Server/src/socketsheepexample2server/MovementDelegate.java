@@ -41,23 +41,13 @@ public class MovementDelegate implements Runnable {
                sb.append(this.movedClients.take());
                sb.append(",");
                size--;
-//<editor-fold defaultstate="collapsed" desc="Old Code">
-//               int cID = this.movedClients.take();
-//               sb.append(cID);
-//               sb.append(":");
-//               sb.append(allServerSheep.get(cID));
-//               sb.append(",");
-//</editor-fold>
             }
 
             for (int i = 0; i < servers.size(); i++) {
                servers.get(i).sendOutputAll(sb.toString());
             }
-//            sendOutputAll(sb.toString());
-
          } catch (IOException | InterruptedException ex) {
-//            printErrors(ex);
-            System.err.println(ex.getMessage());
+            PrintErrors.log(ex);
          }
       }
    }
