@@ -2,18 +2,18 @@ package socketsheepexample2server;
 
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ArrayBlockingQueue;
 
 public class MovementDelegate implements Runnable {
    private final long SEND_INTERVAL;
-   private final LinkedBlockingQueue<String> movedClients;
+   private final ArrayBlockingQueue<String> movedClients;
    private final ArrayList<Server> servers;
    
    private StringBuilder sb;
    
    public MovementDelegate(long sendInterval) {
       this.SEND_INTERVAL = sendInterval;
-      this.movedClients  = new LinkedBlockingQueue<>();
+      this.movedClients  = new ArrayBlockingQueue(1024);
       this.servers       = new ArrayList<>();
    }
    
