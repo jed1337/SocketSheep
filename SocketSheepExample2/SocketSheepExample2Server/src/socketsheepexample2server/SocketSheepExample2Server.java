@@ -9,6 +9,8 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -46,12 +48,12 @@ public class SocketSheepExample2Server {
    
    private static class MovementDelegate implements Runnable{
       private final long SEND_INTERVAL;
-      private final LinkedBlockingQueue<Integer> movedClients;
+      private final BlockingQueue<Integer> movedClients;
       private StringBuilder sb;
       
       public MovementDelegate(long sendInterval){
          this.SEND_INTERVAL = sendInterval;
-         this.movedClients  = new LinkedBlockingQueue<>();
+         this.movedClients  = new ArrayBlockingQueue<Integer>(2048);
       }
 
       public void addToMessage(Integer clientID) throws InterruptedException{
