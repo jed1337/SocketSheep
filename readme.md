@@ -1,5 +1,4 @@
-###ADVANOS Links
-
+###ADVANOS Links  
 * http://codereview.stackexchange.com/questions/106499/single-player-agario-game
 * http://stackoverflow.com/questions/12224827/java-sockets-simple-multiplayer-game-sending-data
 * http://stackoverflow.com/questions/12550712/ive-created-a-java-server-with-sockets-just-how-do-print-to-all-sockets
@@ -16,8 +15,7 @@
 * https://www.youtube.com/watch?v=_1ThWf9Fkfo
 * https://www.youtube.com/watch?v=QhH0e4L1Sm4
 
-###Scaling
-
+###Scaling   
 * http://codereview.stackexchange.com/questions/38557/concurrent-multi-server-pinging-in-java 
 * http://cs.lmu.edu/~ray/notes/javanetexamples/ 
 * http://stackoverflow.com/questions/11707879/difference-between-scaling-horizontally-and-vertically-for-databases
@@ -34,3 +32,18 @@
 * http://www.theserverside.com/discussions/thread.tss?thread_id=20044
 * http://www.tutorialspoint.com/javaexamples/net_multisoc.htm
 * https://blog.openshift.com/best-practices-for-horizontal-application-scaling/
+
+###NIO  
+* http://stackoverflow.com/questions/24195651/create-thousands-of-netty-clients-without-also-creating-thousands-of-threads
+* http://tutorials.jenkov.com/java-nio/overview.html
+* http://tutorials.jenkov.com/java-nio/channels.html
+* http://tutorials.jenkov.com/java-nio/selectors.html
+* http://tutorials.jenkov.com/java-nio/socketchannel.html
+* http://tutorials.jenkov.com/java-nio/server-socket-channel.html
+* http://tutorials.jenkov.com/java-nio/non-blocking-server.html
+* http://tutorials.jenkov.com/java-nio/datagram-channel.html
+* http://tutorials.jenkov.com/java-nio/nio-vs-io.html
+
+
+###Server to Server  
+* http://stackoverflow.com/questions/23526012/server-to-server-communication-with-java
