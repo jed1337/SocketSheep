@@ -21,6 +21,6 @@ public class SocketSheepExample2Server {
       MovementDelegate mDelegate = new MovementDelegate(250);
       new Thread(mDelegate).start();
 
-      multiServer(START_PORT, mDelegate, 2);
+      multiServer(START_PORT, mDelegate, 1);
    }
 }

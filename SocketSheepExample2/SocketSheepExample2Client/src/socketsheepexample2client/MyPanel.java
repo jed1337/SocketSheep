@@ -12,24 +12,31 @@ import javax.swing.JPanel;
 
 public class MyPanel extends JPanel{
    private final BufferedImage SHEEP_IMAGE;
+   private final HashMap<Integer, Integer> allSheep;
    private final int clientID;
    
    private long startTime;
+   private int partitionedWidth;
+   private int partitionedHeight;
    
-   private final HashMap<Integer, int[]> allSheep;
+   private final int PARTITION = 10;
 
    public MyPanel(String filePath, int clientID) throws IOException {
       this.SHEEP_IMAGE = ImageIO.read(new File(filePath));
+      this.allSheep    = new HashMap<>();
       this.clientID    = clientID;
       
-      this.allSheep   = new HashMap<>();
-      this.startTime  = -1;
+      this.startTime   = -1;
       
       this.setBackground(Color.WHITE);
    }
    
-   public void addSheep(int clientID, int[] coordinates){
-      checkCoordinateLength(coordinates);
+   public void updateSize(){
+      this.partitionedWidth  = getWidth()  / PARTITION;
+      this.partitionedHeight = getHeight() / PARTITION;
+   }
+   
+   public void addSheep(int clientID, int coordinates){
       allSheep.put(clientID, coordinates);
    }
    
@@ -45,16 +52,15 @@ public class MyPanel extends JPanel{
    }
    
    public void updateCoordinates(int[] cProc, long startTime){
-      for(int i=0; i<cProc.length; i+=3){
+      for(int i=0; i<cProc.length; i+=2){
          try{
             int id = cProc[i+0];
-            int x  = cProc[i+1];
-            int y  = cProc[i+2];
+            int xy  = cProc[i+1];
          
             //What I want to happen:
             //If the client's not there, he's put there
             //If he is, his coordinates is simply updated
-            this.allSheep.put(id, new int[]{x,y});
+            this.allSheep.put(id, xy);
 
             if(this.clientID == id){
                this.startTime = startTime;
@@ -71,9 +77,19 @@ public class MyPanel extends JPanel{
    public void paintComponent(Graphics g){
       super.paintComponent(g);
 
-      allSheep.forEach((Integer k,int[] v)->{
-         g.drawImage(SHEEP_IMAGE, v[0], v[1], null);
-         g.drawString(Integer.toString(k), v[0], v[1]);
+//<editor-fold defaultstate="collapsed" desc="Old Code">
+//      allSheep.forEach((Integer k,int[] v)->{
+//         g.drawImage(SHEEP_IMAGE, v[0], v[1], null);
+//         g.drawString(Integer.toString(k), v[0], v[1]);
+//      });
+//</editor-fold>
+      
+      allSheep.forEach((k,v)->{
+         int x = (v % PARTITION) * partitionedWidth;
+         int y = (v / PARTITION) * partitionedHeight;
+         
+         g.drawImage(SHEEP_IMAGE, x, y, null);
+         g.drawString(Integer.toString(k), x, y);
       });
       
       if(this.startTime>0){
@@ -99,12 +115,6 @@ public class MyPanel extends JPanel{
       
       if(cCoor.length!=cNames.length*2){
          throwInputMismatchError("Coordinate Array", cNames.length*2, cCoor.length);
-      }
-   }
-   
-   private void checkCoordinateLength(int[] coordinates){
-      if(coordinates.length!=2){
-         throwInputMismatchError("Coordinates", 2, coordinates.length);
       }
    }
    

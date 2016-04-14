@@ -52,16 +52,17 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       this.RANDOM_MOVEMENTS = randomMovements;
       this.clientID         = clientID;
       
-      if(num%2==1){
-        this.socket = new Socket("::1", PORT);
-        System.out.println("PORT 4096 entered : " + num);
-        num++;
-      } else {
-        this.socket = new Socket("::1", PORT+1); 
-        System.out.println("PORT 4097 entered : " + num);
-        num++;
-      }
+//      if(num%2==1){
 //        this.socket = new Socket("::1", PORT);
+//        System.out.println("PORT 4096 entered : " + num);
+//        num++;
+//      } else {
+//        this.socket = new Socket("::1", PORT+1); 
+//        System.out.println("PORT 4097 entered : " + num);
+//        num++;
+//      }
+      
+        this.socket = new Socket("::1", PORT);
       
       this.dIn    = new DataInputStream(socket.getInputStream());
       this.dOut   = new DataOutputStream(socket.getOutputStream());
@@ -75,6 +76,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       this.BUTTONS = new ArrayList<>();
       this.RAND    = new Random();
       setupGUI();
+      
+      this.MY_PANEL.updateSize();
    }
    
 //<editor-fold defaultstate="collapsed" desc="Gui Things">
@@ -132,7 +135,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
                sendOutput(Integer.toString(clientID));
             } 
             else if (input.startsWith("NEW_USER")){
-               enableButtons();
+//               enableButtons();
             } 
             else if (input.startsWith("IMAGE")) {
                handleImages(input);
@@ -140,7 +143,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
             if(RANDOM_MOVEMENTS){
                randomMovement();
             }
-//            System.out.println("input = " + input);
+            System.out.println("input = " + input);
          }
          
       } catch (IOException | NumberFormatException ex) {
@@ -160,7 +163,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    
    private String getInput() throws IOException {
       short procLength = dIn.readShort();
-//      System.out.println("procLength = " + procLength);
+      System.out.println("procLength = " + procLength);
       byte[] bProcData = new byte[procLength];
       dIn.readFully(bProcData);
       String input = new String(bProcData, StandardCharsets.UTF_8);
@@ -183,16 +186,15 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    }
    
    private int[] parseClientAndCoordinates(String[] movedClients){
-      int[] nProc = new int[movedClients.length*3];
+      int[] nProc = new int[movedClients.length*2];
 
       for(int i=0;i<movedClients.length;i++){
          String[] split = movedClients[i].split(":");
          int index      = 0;
          
          try {
-            nProc[(i * 3) + index] = Integer.parseInt(split[(index++)]); //ID
-            nProc[(i * 3) + index] = Integer.parseInt(split[(index++)]); //X
-            nProc[(i * 3) + index] = Integer.parseInt(split[(index++)]); //Y
+            nProc[(i*2) + index] = Integer.parseInt(split[(index++)]); //ID
+            nProc[(i*2) + index] = Integer.parseInt(split[(index++)]); //XY
          } catch (NumberFormatException ex) {
             System.err.println("Moved clients is: "+Arrays.toString(movedClients));
             System.err.println("Split is: "+ Arrays.toString(split));
@@ -207,7 +209,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       int[] procDetails = parseClientAndCoordinates(input.substring(5).split(","));
 
       boolean moved = false;
-      for(int i=0;i<procDetails.length;i+=3){
+      for(int i=0;i<procDetails.length;i+=2){
          if(procDetails[i] == clientID){
             moved = true;
             break;
@@ -277,9 +279,9 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
 //</editor-fold>
    
    public static void main(String[] args) throws IOException, InterruptedException {
-//      singleClient();
+      singleClient();
 //      multiClient(10);
-      multiClient(100);
+//      multiClient(100);
 //      multiClient(20, 1000);
    }
 }
