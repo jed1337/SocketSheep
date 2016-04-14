@@ -191,7 +191,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       for(int i=0;i<movedClients.length;i++){
          String[] split = movedClients[i].split(":");
          int index      = 0;
-         
+
          try {
             nProc[(i*2) + index] = Integer.parseInt(split[(index++)]); //ID
             nProc[(i*2) + index] = Integer.parseInt(split[(index++)]); //XY
