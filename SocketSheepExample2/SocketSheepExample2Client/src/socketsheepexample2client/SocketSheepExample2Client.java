@@ -224,9 +224,13 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          String[] split = movedClients[i].split(":");
          int index      = 0;
          
-         nProc[(i*3)+index] = Integer.parseInt(split[(index++)]); //ID
-         nProc[(i*3)+index] = Integer.parseInt(split[(index++)]); //X
-         nProc[(i*3)+index] = Integer.parseInt(split[(index++)]); //Y
+//         try {
+            nProc[(i * 3) + index] = Integer.parseInt(split[(index++)]); //ID
+            nProc[(i * 3) + index] = Integer.parseInt(split[(index++)]); //X
+            nProc[(i * 3) + index] = Integer.parseInt(split[(index++)]); //Y
+//         } catch (NumberFormatException ex) {
+//            printErrors(ex);
+//         }
       }
       return nProc;
    }
@@ -244,31 +248,6 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
 
       this.MY_PANEL.updateCoordinates(procDetails, moved? start : -1);
    }
-   
-//   //<editor-fold defaultstate="collapsed" desc="Old implementation functions">
-//   private Object[] parseClientAndCoordinates(String[] movedClients){
-//      String[] cNames    = new String[movedClients.length];
-//      int[] cCoordinates = new int[movedClients.length*2];
-//
-//      for(int i=0;i<movedClients.length;i++){
-//         String[] split        = movedClients[i].split(":");
-//         cNames[i]             = split[0];
-//         cCoordinates[(i*2)]   = Integer.parseInt(split[1]);
-//         cCoordinates[(i*2)+1] = Integer.parseInt(split[2]);
-//      }
-//      return new Object[]{cNames, cCoordinates};
-//   }
-//   private void handleImages(String input) throws NumberFormatException {
-//      Object[] protocolDetails = parseClientAndCoordinates(input.substring(5).split(","));
-//      String[] cNames          = (String[])protocolDetails[0];
-//
-//      boolean moved   = Arrays.stream(cNames).anyMatch((cn)->cn.equals(clientName));
-//
-//      MY_PANEL.updateCoordinates(protocolDetails, moved? start : -1);
-//   }
-//
-//
-//</editor-fold>
 
 //<editor-fold defaultstate="collapsed" desc="Movement and set StartTime">
    @Override
@@ -332,7 +311,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    
    public static void main(String[] args) throws IOException, InterruptedException {
 //      singleClient();
-      multiClient(99);
+      multiClient(100);
 //      multiClient(20, 1000);
    }
 }
