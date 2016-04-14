@@ -61,6 +61,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
         System.out.println("PORT 4097 entered : " + num);
         num++;
       }
+//        this.socket = new Socket("::1", PORT);
+      
       this.dIn    = new DataInputStream(socket.getInputStream());
       this.dOut   = new DataOutputStream(socket.getOutputStream());
       
@@ -276,6 +278,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    
    public static void main(String[] args) throws IOException, InterruptedException {
 //      singleClient();
+//      multiClient(10);
       multiClient(100);
 //      multiClient(20, 1000);
    }
