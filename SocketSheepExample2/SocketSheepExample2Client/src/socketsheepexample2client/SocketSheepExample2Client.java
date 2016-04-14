@@ -41,7 +41,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private final boolean RANDOM_MOVEMENTS;
    
    private long start;
-   private static final int NUM = 1;
+   private static int num = 1;
 
    private final Socket socket;
    private final DataOutputStream dOut;
@@ -52,17 +52,17 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       this.RANDOM_MOVEMENTS = randomMovements;
       this.clientID         = clientID;
       
-//      if(num%2==1){
-//        this.socket = new Socket("::1", PORT);
-//        System.out.println("PORT 4096 entered : " + num);
-//        num++;
-//      } else {
-//        this.socket = new Socket("::1", PORT+1); 
-//        System.out.println("PORT 4097 entered : " + num);
-//        num++;
-//      }
-      
+      if(num%2==1){
         this.socket = new Socket("::1", PORT);
+        System.out.println("PORT 4096 entered : " + num);
+        num++;
+      } else {
+        this.socket = new Socket("::1", PORT+1); 
+        System.out.println("PORT 4097 entered : " + num);
+        num++;
+      }
+      
+//        this.socket = new Socket("::1", PORT);
       
       this.dIn    = new DataInputStream(socket.getInputStream());
       this.dOut   = new DataOutputStream(socket.getOutputStream());
@@ -143,7 +143,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
             if(RANDOM_MOVEMENTS){
                randomMovement();
             }
-            System.out.println("input = " + input);
+//            System.out.println("input = " + input);
          }
          
       } catch (IOException | NumberFormatException ex) {
@@ -163,7 +163,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    
    private String getInput() throws IOException {
       short procLength = dIn.readShort();
-      System.out.println("procLength = " + procLength);
+//      System.out.println("procLength = " + procLength);
       byte[] bProcData = new byte[procLength];
       dIn.readFully(bProcData);
       String input = new String(bProcData, StandardCharsets.UTF_8);
@@ -281,7 +281,9 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    public static void main(String[] args) throws IOException, InterruptedException {
 //      singleClient();
 //      multiClient(10);
+//      multiClient(50);
       multiClient(100);
-//      multiClient(20, 1000);
+//      multiClient(150);
+//      multiClient(200);
    }
 }

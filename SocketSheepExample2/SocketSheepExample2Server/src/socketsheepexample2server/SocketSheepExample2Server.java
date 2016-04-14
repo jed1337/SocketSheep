@@ -18,9 +18,9 @@ public class SocketSheepExample2Server {
    }
 
    public static void main(String[] args) throws InterruptedException, IOException {
-      MovementDelegate mDelegate = new MovementDelegate(500);
+      MovementDelegate mDelegate = new MovementDelegate(300);
       new Thread(mDelegate).start();
 
-      multiServer(START_PORT, mDelegate, 1);
+      multiServer(START_PORT, mDelegate, 2);
    }
 }

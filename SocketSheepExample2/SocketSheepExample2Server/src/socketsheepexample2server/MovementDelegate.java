@@ -22,9 +22,6 @@ public class MovementDelegate implements Runnable {
    }
    
    public void addToMessage(String clientAndCoor) throws InterruptedException {
-      if(this.movedClients.contains(clientAndCoor)){
-         this.movedClients.remove();
-      }
       this.movedClients.put(clientAndCoor);
    }
 
