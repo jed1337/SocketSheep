@@ -41,6 +41,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private final boolean RANDOM_MOVEMENTS;
    
    private long start;
+   private static int num = 1;
 
    private final Socket socket;
    private final DataOutputStream dOut;
@@ -50,8 +51,16 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
       super("SHEEP");
       this.RANDOM_MOVEMENTS = randomMovements;
       this.clientID         = clientID;
-
-      this.socket = new Socket("::1", PORT);
+      
+      if(num%2==1){
+        this.socket = new Socket("::1", PORT);
+        System.out.println("PORT 4096 entered : " + num);
+        num++;
+      } else {
+        this.socket = new Socket("::1", PORT+1); 
+        System.out.println("PORT 4097 entered : " + num);
+        num++;
+      }
       this.dIn    = new DataInputStream(socket.getInputStream());
       this.dOut   = new DataOutputStream(socket.getOutputStream());
       
@@ -185,6 +194,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
          } catch (NumberFormatException ex) {
             System.err.println("Moved clients is: "+Arrays.toString(movedClients));
             System.err.println("Split is: "+ Arrays.toString(split));
+            System.err.println("NProc is: "+ Arrays.toString(nProc));
             printErrors(ex);
          }
       }
