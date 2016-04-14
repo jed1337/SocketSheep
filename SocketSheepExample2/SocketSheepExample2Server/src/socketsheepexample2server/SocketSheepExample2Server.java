@@ -4,10 +4,8 @@ import java.io.Closeable;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
-import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.channels.ServerSocketChannel;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
@@ -44,7 +42,6 @@ public class SocketSheepExample2Server {
       private final long SEND_INTERVAL;
       private final LinkedBlockingQueue<Integer> movedClients;
       private StringBuilder sb;
-      private String message;
       
       public MovementDelegate(long sendInterval){
          this.SEND_INTERVAL = sendInterval;
@@ -66,17 +63,6 @@ public class SocketSheepExample2Server {
                   continue;
                }
 
-//<editor-fold defaultstate="collapsed" desc="String">               
-//               message = "IMAGE";
-//               while(size>0){
-//                  int cID = this.movedClients.take();
-//                  message+= cID+":"+allSheep.get(cID)+",";
-//                  size--;
-//               }
-//               sendOutputAll(message);
-//</editor-fold>
-
-////<editor-fold defaultstate="collapsed" desc="StringBuilder">
                sb = new StringBuilder("IMAGE");
                while(size > 0){
                   int cID = this.movedClients.take();
@@ -87,10 +73,7 @@ public class SocketSheepExample2Server {
                   size--;
                }
                sendOutputAll(sb.toString());
-//</editor-fold>
 
-
-               
             } catch (IOException | InterruptedException ex) {
                printErrors(ex);
             }
@@ -165,71 +148,6 @@ public class SocketSheepExample2Server {
          allSheep.get(cNumber).updateLocation(Constants.getDirection(direction));
 //         System.out.println("direction = " + direction);
       }
-      
-////<editor-fold defaultstate="collapsed" desc="Old code">
-//      private void sendUpdatedImageToAllClients(String clientInput, int i) {
-//         updateSheepLocation(new String[]{clientInput.substring(0, i), clientInput.substring(i + 2)});
-////         MOVEMENT_DELEGATE.addToMessage(clientName, allSheep.get(clientName));
-//      }
-//
-//      private void removeClient() {
-//         allSheep.remove(clientName);
-//         allOutputStreams.remove(os);
-//         close(os);
-//         sendToAllClients("REMOVE_USER"+clientName);
-//      }
-//
-////      private void sendImageProtocolToClients() {
-////         String newImage = updateImageProtocol();
-////         sendToAllClients(newImage);
-////      }
-//
-//      private void sendToAllClients(String protocol){
-//         synchronized(allOutputStreams){
-//            Iterator<OutputStream> pwIterator = allOutputStreams.iterator();
-//            while(pwIterator.hasNext()){
-//               try {
-//                  OutputStream os = pwIterator.next();
-//                  os.write(protocol.getBytes());
-//                  os.flush();
-//               } catch (IOException ex) {
-//                  Logger.getLogger(SocketSheepExample2Server.class.getName()).log(Level.SEVERE, null, ex);
-//               }
-//            }
-//         }
-//      }
-//
-//      private String getAllUsers(){
-//         StringBuilder sb = new StringBuilder();
-//
-//         allSheep.forEach((k,v)->{
-//            updateImageProtocol(sb, k, v);
-//            sb.append(",");
-//         });
-//         return sb.toString();
-//      }
-//</editor-fold>
-      
-//<editor-fold defaultstate="collapsed" desc="Updaters">
-      
-//      private String updateImageProtocol() {
-//         StringBuilder sb  = new StringBuilder();
-//         Coordinates cCoor = allSheep.get(clientName);
-//         
-//         sb.append("IMAGE");
-//         updateImageProtocol(sb, clientName, cCoor);
-//         
-//         return sb.toString();
-//      }
-      
-      private void updateImageProtocol(StringBuilder sb, String key, Coordinates value){
-         sb.append(key);
-         sb.append(":");
-         sb.append(value.getX());
-         sb.append(":");
-         sb.append(value.getY());
-      }
-//</editor-fold>
    }
 
    private static void sendOutputAll(String message) throws IOException {
