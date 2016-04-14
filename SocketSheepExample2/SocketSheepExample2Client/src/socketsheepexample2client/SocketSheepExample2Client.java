@@ -41,7 +41,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private final boolean RANDOM_MOVEMENTS;
    
    private long start;
-   private static int num = 1;
+   private static final int NUM = 1;
 
    private final Socket socket;
    private final DataOutputStream dOut;
@@ -135,9 +135,9 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
                sendOutput(Integer.toString(clientID));
             } 
             else if (input.startsWith("NEW_USER")){
-//               enableButtons();
+               enableButtons();
             } 
-            else if (input.startsWith("IMAGE")) {
+            else if (input.startsWith("IMG")) {
                handleImages(input);
             }
             if(RANDOM_MOVEMENTS){
@@ -206,7 +206,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    }
    
    private void handleImages(String input) throws NumberFormatException {
-      int[] procDetails = parseClientAndCoordinates(input.substring(5).split(","));
+      int[] procDetails = parseClientAndCoordinates(input.substring(3).split(","));
 
       boolean moved = false;
       for(int i=0;i<procDetails.length;i+=2){
@@ -279,9 +279,9 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
 //</editor-fold>
    
    public static void main(String[] args) throws IOException, InterruptedException {
-      singleClient();
+//      singleClient();
 //      multiClient(10);
-//      multiClient(100);
+      multiClient(100);
 //      multiClient(20, 1000);
    }
 }

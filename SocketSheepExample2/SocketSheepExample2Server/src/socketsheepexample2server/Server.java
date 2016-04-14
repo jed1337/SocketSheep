@@ -77,26 +77,20 @@ public class Server implements Runnable{
             serverDOut.add(dOut);
             
 //<editor-fold defaultstate="collapsed" desc="Tester messages">
-//            String message = "IMAGE-1337:69";
-//            sendOutput(dOut, message);
-//
-//            message = "Second";
-//            sendOutput(dOut, message);
+//            while(true){
+//               String message = "IMAGE-1337:69";
+//               sendOutput(dOut, message);
+//            }
 //</editor-fold>
             
             while(true){
-               String message = "IMAGE-1337:69";
-               sendOutput(dOut, message);
+               String input = getInput();
+//               System.out.println("input = " + input);
+               updateSheepLocation(input);
+               
+               this.mDelegate.addToMessage(clientID+":"+serverSheep.get(clientID).getXY());
             }
-//            while(true){
-//               String input = getInput();
-////               System.out.println("input = " + input);
-//               updateSheepLocation(input);
-//               
-//               this.mDelegate.addToMessage(clientID+":"+serverSheep.get(clientID));
-//            }
-//            } catch (IOException | InterruptedException ex) {
-         } catch (IOException ex) {
+         } catch (IOException | InterruptedException ex) {
             PrintErrors.log(ex);
          } finally{
             serverSheep.remove(clientID);

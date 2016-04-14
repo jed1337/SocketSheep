@@ -1,47 +1,51 @@
 package socketsheepexample2server;
 
 public class Coordinates {
-   private int x;
-   private int y;
-   
-   private final int moveDistance = 50;
+   private int xy;
+   private final int PARTITION = 10;
    
    public Coordinates(){
-      this(300,300);
+      this(55);
    }
 
-   public Coordinates(int x, int y) {
-      this.x = x;
-      this.y = y;
+   public Coordinates(int xy) {
+      this.xy = xy;
    }
 
-   public int getX() {
-      return x;
+   public int getXY() {
+      return xy;
    }
 
-   public int getY() {
-      return y;
-   }
-   
    public void updateLocation(Constants direction){
       switch(direction){
          case UP:
-            y-=moveDistance;
+            xy -= PARTITION;
             break;
          case DOWN:
-            y+=moveDistance;
+            xy += PARTITION;
             break;
          case RIGHT:
-            x+=moveDistance;
+            xy++;
             break;
          case LEFT:
-            x-=moveDistance;
+            xy--;
             break;
       }
-   }
-   
-   @Override
-   public String toString(){
-      return String.format("%d:%d", x, y);
+//<editor-fold defaultstate="collapsed" desc="Old code">
+//      switch(direction){
+//         case UP:
+//            y-=moveDistance;
+//            break;
+//         case DOWN:
+//            y+=moveDistance;
+//            break;
+//         case RIGHT:
+//            x+=moveDistance;
+//            break;
+//         case LEFT:
+//            x-=moveDistance;
+//            break;
+//      }
+//</editor-fold>
    }
 }

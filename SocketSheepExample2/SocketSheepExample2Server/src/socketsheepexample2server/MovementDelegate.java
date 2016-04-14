@@ -22,6 +22,9 @@ public class MovementDelegate implements Runnable {
    }
    
    public void addToMessage(String clientAndCoor) throws InterruptedException {
+      if(this.movedClients.contains(clientAndCoor)){
+         this.movedClients.remove();
+      }
       this.movedClients.put(clientAndCoor);
    }
 
@@ -36,7 +39,7 @@ public class MovementDelegate implements Runnable {
                continue;
             }
 
-            sb = new StringBuilder("IMAGE");
+            sb = new StringBuilder("IMG");
             while (size > 0) {
                sb.append(this.movedClients.take());
                sb.append(",");
