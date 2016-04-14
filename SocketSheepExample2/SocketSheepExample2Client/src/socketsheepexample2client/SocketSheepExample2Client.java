@@ -238,6 +238,8 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
               nProc[(i * 3) + index] = Integer.parseInt(split[(index++)]); //X
               nProc[(i * 3) + index] = Integer.parseInt(split[(index++)]); //Y
           } catch (NumberFormatException numberFormatException) {
+              System.err.println(Arrays.toString(movedClients));
+              System.err.println(Arrays.toString(nProc));
               printErrors(numberFormatException);
           }
       }
@@ -345,7 +347,7 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    
    public static void main(String[] args) throws IOException, InterruptedException {
 //      singleClient();
-      multiClient(5);
+      multiClient(100);
 //      multiClient(20, 1000);
    }
 }
