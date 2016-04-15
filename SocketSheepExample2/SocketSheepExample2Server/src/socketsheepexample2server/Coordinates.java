@@ -4,9 +4,10 @@ public class Coordinates {
    private int x;
    private int y;
    
-   private final int moveDistance = 50;
+   private final int move = 50;
    
    public Coordinates(){
+//      this(0,0);
       this(300,300);
    }
 
@@ -26,16 +27,16 @@ public class Coordinates {
    public void updateLocation(Constants direction){
       switch(direction){
          case UP:
-            y-=moveDistance;
+            y-=move;
             break;
          case DOWN:
-            y+=moveDistance;
+            y+=move;
             break;
          case RIGHT:
-            x+=moveDistance;
+            x+=move;
             break;
          case LEFT:
-            x-=moveDistance;
+            x-=move;
             break;
       }
    }

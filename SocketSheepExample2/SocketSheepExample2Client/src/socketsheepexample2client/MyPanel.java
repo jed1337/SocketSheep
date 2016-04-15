@@ -7,60 +7,68 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.InputMismatchException;
+import java.util.NoSuchElementException;
 import javax.imageio.ImageIO;
 import javax.swing.JPanel;
 
 public class MyPanel extends JPanel{
-   private final BufferedImage SHEEP_IMAGE;
-   private final int clientID;
-   
+   private final BufferedImage sheepImage;
+//   private int[] nCoordinates;
+//   private String[] clientNames;
+   private String clientName;
    private long startTime;
    
-   private final HashMap<Integer, int[]> allSheep;
+   private HashMap<String, int[]> allSheep;
 
-   public MyPanel(String filePath, int clientID) throws IOException {
-      this.SHEEP_IMAGE = ImageIO.read(new File(filePath));
-      this.clientID    = clientID;
-      
+   public MyPanel(String filePath) throws IOException {
+      this.sheepImage = ImageIO.read(new File(filePath));
       this.allSheep   = new HashMap<>();
       this.startTime  = -1;
+      
+//      this.nCoordinates   = new int[0];
+//      this.clientNames    = new String[0];
+//      this.clientMoved    = false;
       
       this.setBackground(Color.WHITE);
    }
    
-   public void addSheep(int clientID, int[] coordinates){
-      checkCoordinateLength(coordinates);
-      allSheep.put(clientID, coordinates);
+   public void setClientName(String clientName){
+      this.clientName = clientName;
    }
    
-   public void removeSheep(int clientID){
-      checkIfContainsSheep(clientID);
-      allSheep.remove(clientID);
+   public void addSheep(String name, int[] coordinates){
+      checkCoordinateLength(coordinates);
+      allSheep.put(name, coordinates);
+   }
+   
+   public void removeSheep(String name){
+      checkIfContainsSheep(name);
+      allSheep.remove(name);
       this.repaint();
    }
 
    public void updateCoordinates(Object[] protocolDetails, long startTime){
       checkProtocolLength(protocolDetails);
-      updateCoordinates((int[])protocolDetails[1], startTime);
+      updateCoordinates((String[])protocolDetails[0], (int[])protocolDetails[1], startTime);
    }
    
-   public void updateCoordinates(int[] cProc, long startTime){
-      for(int i=0; i<cProc.length; i+=3){
-         try{
-            int id = cProc[i+0];
-            int x  = cProc[i+1];
-            int y  = cProc[i+2];
+   public void updateCoordinates(String[] cNames, int[] cCoor, long startTime){
+//      this.clientNames  = clientNames;
+//      this.nCoordinates = clientCoordinates;
+//      this.clientMoved  = clientMoved;
+      
+//      if(clientMoved){
+//         this.startTime = startTime;
+//      }
+      for(int i=0; i<cNames.length; i++){
+         checkIfContainsSheep(cNames[i]);
+         int x = cCoor[(i*2)];
+         int y = cCoor[(i*2)+1];
          
-            //What I want to happen:
-            //If the client's not there, he's put there
-            //If he is, his coordinates is simply updated
-            this.allSheep.put(id, new int[]{x,y});
-
-            if(this.clientID == id){
-               this.startTime = startTime;
-            }
-         }catch(ArrayIndexOutOfBoundsException e){
-            System.err.println(e);
+         this.allSheep.put(cNames[i], new int[]{x,y});
+         
+         if(this.clientName.equals(cNames[i])){
+            this.startTime = startTime;
          }
       }
       
@@ -71,22 +79,29 @@ public class MyPanel extends JPanel{
    public void paintComponent(Graphics g){
       super.paintComponent(g);
 
-      allSheep.forEach((Integer k,int[] v)->{
-         g.drawImage(SHEEP_IMAGE, v[0], v[1], null);
-         g.drawString(Integer.toString(k), v[0], v[1]);
+//      try {
+//         Thread.sleep(1000);
+//      } catch (InterruptedException ex) {
+//         System.out.println(ex.getMessage());
+//      }
+      
+      allSheep.forEach((k,v)->{
+         g.drawImage(sheepImage, v[0], v[1], null);
+         g.drawString(k, v[0], v[1]);
       });
       
       if(this.startTime>0){
          System.out.println(String.format("Latency of %s is %dms ", 
-            this.clientID, (System.currentTimeMillis()-this.startTime)));
+            this.clientName, (System.currentTimeMillis()-this.startTime)));
          this.startTime   = -1;
       }
    }
       
    //<editor-fold defaultstate="collapsed" desc="Checkers">
-   private boolean checkIfContainsSheep(int clientID){
-//         throw new NoSuchElementException("Does not contain the name "+name);      
-      return allSheep.containsKey(clientID);
+   private void checkIfContainsSheep(String name){
+      if(!allSheep.containsKey(name)){
+         throw new NoSuchElementException("Does not contain the name "+name);
+      }
    }
    
    private void checkProtocolLength(Object[] p){
