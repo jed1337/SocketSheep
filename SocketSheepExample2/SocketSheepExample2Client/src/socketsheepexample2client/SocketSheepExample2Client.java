@@ -21,7 +21,7 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 
 public class SocketSheepExample2Client extends JFrame implements ActionListener, Runnable {
-   private final static int PORT     = 4096;
+   private final static int START_PORT     = 4096;
    private final static String UP    = "U";
    private final static String DOWN  = "D";
    private final static String LEFT  = "L";
@@ -41,28 +41,26 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
    private final boolean RANDOM_MOVEMENTS;
    
    private long start;
-   private static int num = 1;
-
-   private final Socket socket;
+   private static int num = 0;
+   
+   private Socket socket;
    private final DataOutputStream dOut;
    private final DataInputStream dIn;
    
-   public SocketSheepExample2Client(boolean randomMovements, int clientID) throws IOException {
+   public SocketSheepExample2Client(boolean randomMovements, int clientID, int serverCount) throws IOException {
       super("SHEEP");
       this.RANDOM_MOVEMENTS = randomMovements;
       this.clientID         = clientID;
       
-      if(num%2==1){
-        this.socket = new Socket("::1", PORT);
-        System.out.println("PORT 4096 entered : " + num);
-        num++;
-      } else {
-        this.socket = new Socket("::1", PORT+1); 
-        System.out.println("PORT 4097 entered : " + num);
-        num++;
+      for (int i = 0; i < serverCount; i++) {
+         if(num%serverCount == i){
+            int port = START_PORT+i;
+            this.socket = new Socket("::1", port);
+            System.out.println("PORT "+ port + " entered : " + num);
+            num++;
+            break;
+         }
       }
-      
-//        this.socket = new Socket("::1", PORT);
       
       this.dIn    = new DataInputStream(socket.getInputStream());
       this.dOut   = new DataOutputStream(socket.getOutputStream());
@@ -254,36 +252,29 @@ public class SocketSheepExample2Client extends JFrame implements ActionListener,
 //</editor-fold>
    
 //<editor-fold defaultstate="collapsed" desc="Single or Multi client">
-   public static void singleClient() throws IOException, InterruptedException{
+   public static void singleClient(int serverCount) throws IOException, InterruptedException{
       System.out.println("Started single client");
       
-      SocketSheepExample2Client sheep = new SocketSheepExample2Client(false, -1337);
+      SocketSheepExample2Client sheep = new SocketSheepExample2Client(false, -1337, serverCount);
       sheep.setVisible(true);
       new Thread(sheep).start();
    }
    
-   private static void multiClient(int SHEEP_LIMIT) throws IOException, InterruptedException {
-       multiClient(SHEEP_LIMIT, 0);
-   }
-   
-   private static void multiClient(int SHEEP_LIMIT, long TIME) throws IOException, InterruptedException{
-      singleClient();
+   private static void multiClient(int SHEEP_LIMIT, int serverCount) throws IOException, InterruptedException{
+      singleClient(serverCount);
       
       System.out.println("Started multi client");
       
       for (int i = 1; i<=SHEEP_LIMIT; i++) {
-         new Thread(new SocketSheepExample2Client(true, i)).start();
-         Thread.sleep(TIME);
+         new Thread(new SocketSheepExample2Client(true, i, serverCount)).start();
       }
    }
 //</editor-fold>
    
    public static void main(String[] args) throws IOException, InterruptedException {
-//      singleClient();
-//      multiClient(10);
-//      multiClient(50);
-      multiClient(100);
-//      multiClient(150);
-//      multiClient(200);
+//      singleClient(2);
+//      multiClient(10, 5);
+//      multiClient(50, 2);
+      multiClient(300, 2);
    }
 }

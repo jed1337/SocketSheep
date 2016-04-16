@@ -11,9 +11,9 @@ public class SocketSheepExample2Server {
       new Thread(new Server(port, mDelegate)).start();
    }
 
-   private static void multiServer(int port, MovementDelegate mDelegate, int serverCount) throws IOException, InterruptedException {
+   private static void multiServer(MovementDelegate mDelegate, int serverCount) throws IOException, InterruptedException {
       for (int i = 0; i < serverCount; i++) {
-         singleServer(port+i, mDelegate);
+         singleServer(START_PORT+i, mDelegate);
       }
    }
 
@@ -21,6 +21,6 @@ public class SocketSheepExample2Server {
       MovementDelegate mDelegate = new MovementDelegate(300);
       new Thread(mDelegate).start();
 
-      multiServer(START_PORT, mDelegate, 2);
+      multiServer(mDelegate, 2);
    }
 }

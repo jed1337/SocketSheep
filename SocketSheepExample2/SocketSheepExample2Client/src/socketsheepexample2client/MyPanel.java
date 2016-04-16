@@ -36,10 +36,6 @@ public class MyPanel extends JPanel{
       this.partitionedHeight = getHeight() / PARTITION;
    }
    
-   public void addSheep(int clientID, int coordinates){
-      allSheep.put(clientID, coordinates);
-   }
-   
    public void removeSheep(int clientID){
       checkIfContainsSheep(clientID);
       allSheep.remove(clientID);
@@ -93,8 +89,10 @@ public class MyPanel extends JPanel{
       });
       
       if(this.startTime>0){
-         System.out.println(String.format("Latency of %s is %dms ", 
-            this.clientID, (System.currentTimeMillis()-this.startTime)));
+//         System.out.println(String.format("Latency of %s is %dms ", 
+//            this.clientID, (System.currentTimeMillis()-this.startTime)));
+         
+         System.out.println(String.format("%dms ", (System.currentTimeMillis()-this.startTime)));
          this.startTime   = -1;
       }
    }
